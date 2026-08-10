@@ -1,6 +1,6 @@
 # MyApp
 
-A small, production-ready starting point for a web application. It uses React, TypeScript, Vite, Supabase, Cloudflare Pages, and GitHub Actions—without a server to maintain.
+A small, production-ready starting point for a web application. It uses React, TypeScript, Vite, Supabase, Cloudflare Workers Static Assets, and GitHub Actions—without an application server to maintain.
 
 The current application intentionally shows only **“MyApp is running.”**
 
@@ -10,14 +10,14 @@ The current application intentionally shows only **“MyApp is running.”**
 
 1. Work is proposed in a GitHub pull request.
 2. GitHub automatically checks types, code style, tests, and the production build.
-3. Review the preview supplied by Cloudflare Pages.
-4. Merge only when the checks pass and the preview looks right. Cloudflare Pages then publishes the `main` branch.
+3. Review the Cloudflare Worker version uploaded to the `preview` environment.
+4. Merge only when the checks pass and the preview looks right. Deploy the merged `main` branch as Production.
 
 You do not need to run commands for normal reviews. Do not share passwords or the contents of `.env` files in GitHub issues, commits, or chat.
 
 ## First-time service setup
 
-Both Supabase and Cloudflare Pages have free plans suitable for a small application.
+Both Supabase and Cloudflare Workers have free plans suitable for a small application.
 
 ### Supabase
 
@@ -28,14 +28,16 @@ Both Supabase and Cloudflare Pages have free plans suitable for a small applicat
 
 The app has a Supabase client ready for future features. It is created only when both public settings are present, so local setup and CI do not need credentials yet.
 
-### Cloudflare Pages
+### Cloudflare Workers
 
-1. In Cloudflare, create a **Pages** project connected to this GitHub repository.
-2. Choose the **Vite** framework preset (or set build command `npm run build` and output directory `dist`).
-3. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` under the Pages project's environment variables for both preview and production.
-4. Set the production branch to `main`. Pull requests will receive preview deployments; merging publishes production.
+The repository uses current **Workers Static Assets**, not the older Workers Sites feature. Wrangler uploads the Vite output in `dist/`; there is no Worker API or backend. Requests that do not match a file fall back to `index.html` so React client-side routes load correctly.
 
-No Cloudflare credentials are stored in GitHub because deployment is handled by Cloudflare's Git integration.
+1. In Cloudflare, create or allow Wrangler to create the Production Worker named `proj-port-dash` and the non-production Worker named `proj-port-dash-preview`.
+2. In the Cloudflare build configuration, use `npm ci && npm run build` as the build command. Supply `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, and `VITE_APP_ENV` as build variables separately for Production and Preview. Use only DEV Supabase values in Preview. These `VITE_` values are compiled into public browser files, so never use a service-role key or another secret.
+3. Keep `main` as the Production branch. From a completed Production build, run `npx wrangler deploy`. From a completed Preview build, run `npx wrangler versions upload --env preview`.
+4. In the Worker settings, enable a `workers.dev` address or add a custom domain for Production. Give the preview Worker its own non-production address. A versions upload creates a version without automatically changing Production traffic; use Cloudflare's version/traffic controls when you want reviewers to visit it.
+
+Cloudflare authentication belongs in Cloudflare's deployment integration or CI secrets, never in this repository. No Supabase or Cloudflare credential is committed here.
 
 ## Developer setup
 
@@ -58,6 +60,8 @@ Open the local address printed by Vite. Useful commands:
 | `npm run test:watch` | Re-run tests while editing |
 | `npm run build` | Create the production site in `dist/` |
 | `npm run preview` | Preview the production build locally |
+| `npx wrangler deploy` | Upload `dist/` to the Production Worker |
+| `npx wrangler versions upload --env preview` | Upload `dist/` as a non-production Worker version |
 
 Commit `package-lock.json` whenever dependencies change. CI uses `npm ci` for repeatable installation.
 

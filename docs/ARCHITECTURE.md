@@ -2,15 +2,15 @@
 
 ## Overview
 
-MyApp is a static single-page application built by Vite. React renders the interface, TypeScript checks application contracts, and Cloudflare Pages serves the generated files. Future browser-side data and authentication use the Supabase JavaScript client and Supabase-hosted services.
+MyApp is a static single-page application built by Vite. React renders the interface, TypeScript checks application contracts, and Cloudflare Workers Static Assets serves the generated files. Future browser-side data and authentication use the Supabase JavaScript client and Supabase-hosted services.
 
 ```text
 Browser
-  ├── static HTML/CSS/JavaScript ── Cloudflare Pages
+  ├── static HTML/CSS/JavaScript ── Cloudflare Workers Static Assets
   └── authenticated API calls ───── Supabase (Auth + Postgres)
 
 GitHub pull request ── GitHub Actions checks
-                    └─ Cloudflare preview deployment
+                    └─ Cloudflare preview Worker version
 ```
 
 There is no application server in this repository. Values prefixed with `VITE_` are embedded into browser assets at build time and must never contain secrets.
@@ -23,6 +23,7 @@ There is no application server in this repository. Values prefixed with `VITE_` 
 | `src/lib/supabase.ts` | Single browser client integration point |
 | `docs/` | Product and architecture decisions |
 | `.github/workflows/verify.yml` | Pull-request and branch verification |
+| `wrangler.jsonc` | Production and Preview static-asset deployment settings |
 | `dist/` | Generated production output; never committed |
 
 ## Key choices
@@ -30,7 +31,8 @@ There is no application server in this repository. Values prefixed with `VITE_` 
 - **Vite and React:** a small, conventional client application with fast local feedback.
 - **Strict TypeScript:** catches interface mistakes before deployment.
 - **Supabase client is optional at startup:** CI and the placeholder page work without credentials, while future features have one validated client entry point.
-- **Cloudflare Git integration:** produces previews and production deployments without committing an API token or maintaining a deployment workflow.
+- **Workers Static Assets:** Wrangler uploads `dist/` directly, with SPA fallback serving `index.html` for client-side routes. No Worker API is needed.
+- **Separate Cloudflare environments:** the default Worker is Production and `preview` names an isolated non-production Worker. Build-time `VITE_` values are supplied outside Git for each environment.
 - **GitHub Actions:** uses the lockfile and runs installation, type checking, linting, tests, and a production build on every pull request and pushes to `main`.
 
 ## Security boundaries
@@ -45,7 +47,7 @@ There is no application server in this repository. Values prefixed with `VITE_` 
 
 Vitest and Testing Library verify visible behavior in a browser-like environment. ESLint checks React, TypeScript, and hooks conventions. `tsc` checks both app and tool configuration. Vite's production build is the final compilation check.
 
-A contributor opens a pull request, GitHub Actions runs all checks, and Cloudflare creates a preview. The owner reviews the preview. Only an approved merge to `main` triggers the production deployment. Rollback is performed from Cloudflare Pages by selecting a previously successful deployment, then the source change should be reverted in GitHub.
+A contributor opens a pull request and GitHub Actions runs all checks. A completed Vite build can be uploaded with `npx wrangler versions upload --env preview` for review without deploying to Production. Only an approved merge to `main` may be deployed with `npx wrangler deploy`. Cloudflare keeps Worker versions for rollback; the source change should also be reverted in GitHub.
 
 ## Evolution rules
 
