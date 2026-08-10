@@ -16,6 +16,7 @@ There are no accounts, data-entry flows, analytics, or background jobs in this f
 
 - **Visitors** will eventually use the product through a browser.
 - **The owner** reviews pull-request previews and approves releases without needing a local development environment.
+- Cloudflare Preview deployments display a small `DEVELOPMENT ENVIRONMENT` banner at the top of the page; Production does not display the banner.
 - **Contributors** make focused changes through pull requests and keep documentation and tests current.
 
 ## Product principles
