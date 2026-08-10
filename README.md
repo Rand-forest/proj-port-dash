@@ -33,9 +33,10 @@ The app has a Supabase client ready for future features. It is created only when
 The repository uses current **Workers Static Assets**, not the older Workers Sites feature. Wrangler uploads the Vite output in `dist/`; there is no Worker API or backend. Requests that do not match a file fall back to `index.html` so React client-side routes load correctly.
 
 1. In Cloudflare, create or allow Wrangler to create the Production Worker named `proj-port-dash` and the non-production Worker named `proj-port-dash-preview`.
-2. In the Cloudflare build configuration, use `npm ci && npm run build` as the build command. Supply `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, and `VITE_APP_ENV` as build variables separately for Production and Preview. Use only DEV Supabase values in Preview. These `VITE_` values are compiled into public browser files, so never use a service-role key or another secret.
-3. Keep `main` as the Production branch. From a completed Production build, run `npx wrangler deploy`. From a completed Preview build, run `npx wrangler versions upload --env preview`.
-4. In the Worker settings, enable a `workers.dev` address or add a custom domain for Production. Give the preview Worker its own non-production address. A versions upload creates a version without automatically changing Production traffic; use Cloudflare's version/traffic controls when you want reviewers to visit it.
+2. Create these Cloudflare build variables: `DEV_SUPABASE_URL`, `DEV_SUPABASE_PUBLISHABLE_KEY`, `PROD_SUPABASE_URL`, and `PROD_SUPABASE_PUBLISHABLE_KEY`. Use only public browser configuration—never a service-role key or another secret. Set the build command to `npm ci && npm run build:cloudflare`.
+3. The Cloudflare build wrapper uses `WORKERS_CI_BRANCH`: `main` maps the PROD pair to the app's `VITE_` variables and sets `VITE_APP_ENV=production`; every other branch maps the DEV pair and sets `VITE_APP_ENV=development`. The build stops with a clear error if its selected pair is missing. Cloudflare supplies `WORKERS_CI_BRANCH`; do not create it yourself.
+4. Keep `main` as the Production branch. From a completed Production build, run `npx wrangler deploy`. From a completed Preview build, run `npx wrangler versions upload --env preview`.
+5. In the Worker settings, enable a `workers.dev` address or add a custom domain for Production. Give the preview Worker its own non-production address. A versions upload creates a version without automatically changing Production traffic; use Cloudflare's version/traffic controls when you want reviewers to visit it.
 
 Cloudflare authentication belongs in Cloudflare's deployment integration or CI secrets, never in this repository. No Supabase or Cloudflare credential is committed here.
 
@@ -59,6 +60,7 @@ Open the local address printed by Vite. Useful commands:
 | `npm test` | Run the automated tests once |
 | `npm run test:watch` | Re-run tests while editing |
 | `npm run build` | Create the production site in `dist/` |
+| `npm run build:cloudflare` | Select DEV or PROD browser configuration from the Cloudflare branch, then build |
 | `npm run preview` | Preview the production build locally |
 | `npx wrangler deploy` | Upload `dist/` to the Production Worker |
 | `npx wrangler versions upload --env preview` | Upload `dist/` as a non-production Worker version |
