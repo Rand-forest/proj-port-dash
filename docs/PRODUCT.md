@@ -2,25 +2,19 @@
 
 ## Purpose
 
-Pulse is a stakeholder-facing project dashboard mockup. It gives project sponsors and delivery teams a shared, easy-to-scan view of progress, delivery health, budget, milestones, updates, and risks.
+MyApp is a deliberately small foundation from which a useful web product can be built safely. Its owner may not be a developer, so routine review and deployment should happen through visual previews and clear automated checks.
 
 ## Current behavior
 
-The overview presents realistic sample data for the fictional Nova Platform project. It includes:
+The sole initial user-facing requirement is a page that displays:
 
-- Top-level progress, budget, task, and health indicators.
-- A six-month planned-versus-actual progress chart.
-- Upcoming milestones and delivery dates.
-- Recent team updates and reactions.
-- Risks and blockers that need stakeholder attention.
-- Responsive navigation for desktop and mobile layouts.
+> MyApp is running.
 
-The dashboard is currently a visual mockup. Its data is local and read-only; there are no accounts, database writes, analytics, or background jobs.
+There are no accounts, data-entry flows, analytics, or background jobs in this first version.
 
 ## Intended users
 
-- **Project stakeholders** use the overview to understand delivery status without needing access to delivery tools.
-- **Project leads** use the page as a concise structure for communicating progress and concerns.
+- **Visitors** will eventually use the product through a browser.
 - **The owner** reviews pull-request previews and approves releases without needing a local development environment.
 - Cloudflare Preview deployments display a small `DEVELOPMENT ENVIRONMENT` banner at the top of the page; Production does not display the banner.
 - **Contributors** make focused changes through pull requests and keep documentation and tests current.
