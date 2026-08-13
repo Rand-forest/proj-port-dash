@@ -69,7 +69,9 @@ Commit `package-lock.json` whenever dependencies change. CI uses `npm ci` for re
 
 ### Local database foundation
 
-MIG-04 adds a version-controlled Supabase schema, RLS policies, trusted mutation functions, sanitized seed data, and pgTAP policy tests under `supabase/`. With the Supabase CLI and its normal local prerequisites installed, `supabase db reset` rebuilds the local database from zero and `supabase test db` runs the database tests. These commands target local/DEV work only; applying a migration to Production requires separate owner approval.
+MIG-04 adds a version-controlled Supabase schema, RLS policies, trusted mutation functions, sanitized seed data, and pgTAP policy tests under `supabase/`. With the Supabase CLI and its normal local prerequisites installed, run `supabase start`, `supabase db reset`, and `supabase test db` to start isolated services, rebuild the local database from migrations and seed, and run both database test suites. These commands target local/DEV work only; applying a migration to Production requires separate owner approval.
+
+Pull requests that change `supabase/**` run the same sequence in an ephemeral GitHub Actions environment. The workflow pins Supabase CLI `2.39.2` for reproducible checks and uses no linked project or Supabase credentials.
 
 ## Documentation
 
