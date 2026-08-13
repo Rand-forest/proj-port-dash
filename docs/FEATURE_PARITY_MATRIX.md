@@ -15,7 +15,7 @@ This matrix is the migration checklist for behavior found in the legacy source. 
 | Project statuses | Five fixed values with colored styling | MIGRATE | Data contract/UI | All values render and can be selected exactly as baseline | No |
 | Project types | Key Project, BAU Project, blank/unassigned | REVIEW | Data contract/UI | Approved handling of blank and fixed values is preserved | Yes — blank semantics |
 | Team and department | Modal edits five Project fields | MIGRATE | Write migration | Values display and persist together | No |
-| Financials | Budget and actual spend stored as strings | REVIEW | Data design | Approved values round-trip without unintended conversion | Yes — text vs currency |
+| Financials | Budget and actual spend stored as strings | REVIEW | Data design | Exact amounts round-trip in each project's required currency; ambiguous legacy currencies are escalated, and totals do not combine currencies without approved FX conversion | Yes — import exceptions only; multi-currency approved in MIG-03A |
 | Objective and scope | Editable text with empty display messages | MIGRATE | Write migration | Multiline content and fallbacks remain observable | No |
 | Overview Gantt window | Select start/end month and fixed 2024–2029 year | REVIEW | UI migration | Approved year range and valid month constraints work | Yes — year horizon |
 | Current-date line | Fractional position within selected current month/year | MIGRATE | UI migration | Line appears only in visible current period at equivalent position | No |
