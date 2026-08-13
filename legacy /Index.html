@@ -1,1 +1,1613 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPH Media - Project Portfolio</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'sph-blue': '#4da6ff', 
+                        'sph-light-blue': '#80bfff',
+                        'sph-dark-bg': '#111827', 
+                        'sph-card-bg': '#1f2937', 
+                        'sph-card-hover': '#374151', 
+                        'sph-border': '#374151',
+                        'status-not-started': '#6b7280', 
+                        'status-on-track': '#22c55e', 
+                        'status-at-risk': '#eab308',
+                        'status-overdue': '#ef4444', 
+                        'status-completed': '#3b82f6', 
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #111827; 
+            color: #f3f4f6; 
+        }
+        
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        
+        .gantt-bar-container { position: relative; }
+        
+        .gantt-tooltip {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            bottom: 100%; 
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #000000;
+            color: white;
+            text-align: center;
+            padding: 8px 12px;
+            border-radius: 6px;
+            z-index: 100; 
+            white-space: nowrap;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            transition: opacity 0.2s, visibility 0.2s;
+            margin-bottom: 8px;
+            font-size: 0.75rem;
+            pointer-events: none; 
+            border: 1px solid #374151;
+        }
+        
+        .gantt-tooltip::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #000000 transparent transparent transparent;
+        }
 
+        .gantt-bar-container:hover .gantt-tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .gantt-bar {
+            transition: transform 0.1s ease-in-out, filter 0.1s ease-in-out;
+            border-radius: 2px;
+        }
+        .gantt-bar-container:hover .gantt-bar {
+            transform: scaleY(1.1);
+            filter: brightness(1.2);
+            z-index: 40;
+            box-shadow: 0 0 8px rgba(255,255,255,0.2);
+        }
+
+        input, select, textarea {
+            background-color: #374151; 
+            color: #f3f4f6;
+            border-color: #4b5563; 
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px #4da6ff; 
+            border-color: transparent;
+        }
+        
+        input.header-input {
+            background-color: #1f2937;
+            color: #4da6ff;
+            border-bottom-color: #4da6ff;
+        }
+
+        ::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        /* STREAMING_CHUNK: Injecting Executive PDF Print Styles... */
+        @media print {
+            @page {
+                size: landscape;
+                margin: 0.4in;
+            }
+            body {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                background-color: #111827 !important;
+            }
+            .print-hide {
+                display: none !important;
+            }
+            .print-avoid-break {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+            /* Remove shadows for cleaner print */
+            * {
+                box-shadow: none !important;
+            }
+            /* Ensure the root container takes full width */
+            #root, .max-w-7xl {
+                max-width: 100% !important;
+                width: 100% !important;
+            }
+        }
+    </style>
+</head>
+<body class="dark:bg-sph-dark-bg text-gray-100">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // Mock data fallback for local dev
+        const initialData = [
+            {
+                id: 'p1', name: 'News Centre Firewalls Tech Refresh', department: 'Infra & Ops', projectType: 'Key Project', sponsor: 'Jeffrey Toh', manager: 'Samuel Lim (SL)', techLead: 'Wong Yoke How (YH)', teamMembers: 'Kyaw Thet (KT), Krisna Karmadwiyarsa (KK)', objective: 'Refresh aging News Centre (NC) Firewalls reaching end of life in 2026 and integrate them into a clustered design with Print Centre (PC) Firewalls.', scope: 'Procurement and deployment of new 2 units of Firewalls in NC to replace ageing devices nearing end of life.\nMigrate firewall rulesets, configurations, and policies to the new environment.', budget: '$495K', actualSpend: '$369K', overallStatus: 'On Track',
+                activities: [
+                    { id: 'a1', name: 'NM F5 Migration', startYear: 2026, startMonth: 0, duration: 0.5, status: 'Completed', isMilestone: true, category: 'Execution', level: 0, comments: [] },
+                    { id: 'a2', name: 'Firewall Installation and VDOM creation', startYear: 2026, startMonth: 0.5, duration: 2.5, status: 'Completed', isMilestone: true, category: 'Execution', level: 0, comments: [] }
+                ],
+                raidItems: [
+                    { id: 'r1', type: 'Issue', description: 'Server delivery delayed by 2 weeks due to customs.', owner: 'J. Toh', status: 'Open', startDate: '2026-01-15T00:00:00.000Z', endDate: '2026-01-29T00:00:00.000Z', comments: [] },
+                    { id: 'r2', type: 'Risk', description: 'Potential budget overrun on licensing if FX rates drop.', owner: 'S. Lim', status: 'Mitigated', startDate: '2026-02-01T00:00:00.000Z', endDate: '2026-09-30T00:00:00.000Z', comments: [] }
+                ],
+                tasks: [
+                    { id: 't1', date: new Date().toISOString(), name: 'Submit PO', details: 'Submit PO to procurement for firewalls', status: 'Pending' },
+                    { id: 't2', date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), name: 'Vendor Brief', details: 'Walkthrough of constraints', status: 'Completed' }
+                ]
+            },
+            {
+                id: 'p2', name: 'Routine Server Patching Q3', department: 'Infra & Ops', projectType: 'BAU Project', sponsor: 'Jeffrey Toh', manager: 'Samuel Lim (SL)', techLead: 'Kyaw Thet (KT)', teamMembers: '', objective: 'Quarterly OS patching for all Windows servers in the DMZ.', scope: 'Apply Q3 security patches.', budget: '$0', actualSpend: '$0', overallStatus: 'Not Started',
+                activities: [], raidItems: [], tasks: []
+            }
+        ];
+
+        const ALL_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const DEPARTMENTS = ['ALL', 'Infra & Ops', 'Corp Systems', 'Cyber Security', 'Digital Workspace'];
+        
+        const STATUS_COLORS = {
+            'Not Started': 'bg-status-not-started',
+            'On Track': 'bg-status-on-track',
+            'At Risk': 'bg-status-at-risk',
+            'Overdue': 'bg-status-overdue',
+            'Completed': 'bg-status-completed'
+        };
+
+        const TASK_STATUS_STYLES = {
+            'Pending': 'text-gray-400 bg-gray-800 border-gray-700',
+            'In Progress': 'text-sph-blue bg-blue-900/30 border-blue-800/50',
+            'Completed': 'text-green-400 bg-green-900/30 border-green-800/50',
+            'Blocked': 'text-red-400 bg-red-900/30 border-red-800/50'
+        };
+
+        const RAID_STYLES = {
+            'Risk': { bg: 'bg-amber-900', text: 'text-amber-300', dot: 'bg-amber-500' },
+            'Assumption': { bg: 'bg-blue-900', text: 'text-blue-300', dot: 'bg-blue-500' },
+            'Issue': { bg: 'bg-red-900', text: 'text-red-300', dot: 'bg-red-500' },
+            'Dependency': { bg: 'bg-purple-900', text: 'text-purple-300', dot: 'bg-purple-500' }
+        };
+
+        const PROJECT_TYPE_STYLES = {
+            'Key Project': { container: 'bg-amber-900/30 border-amber-700/50', text: 'text-amber-400', icon: 'fa-star' },
+            'BAU Project': { container: 'bg-slate-800 border-slate-600', text: 'text-slate-300', icon: 'fa-rotate-right' },
+            'UNASSIGNED': { container: 'bg-gray-800 border-gray-600', text: 'text-gray-400', icon: 'fa-circle-question' }
+        };
+
+        // Utility Date Functions for Task Filtering
+        const getStartOfWeek = (d) => { const date = new Date(d); const day = date.getDay(); const diff = date.getDate() - day + (day === 0 ? -6 : 1); return new Date(date.setDate(diff)).setHours(0,0,0,0); };
+        const getEndOfWeek = (d) => { const start = new Date(getStartOfWeek(d)); return new Date(start.setDate(start.getDate() + 6)).setHours(23,59,59,999); };
+        const getStartOfMonth = (d) => { const date = new Date(d); return new Date(date.getFullYear(), date.getMonth(), 1).setHours(0,0,0,0); };
+        const getEndOfMonth = (d) => { const date = new Date(d); return new Date(date.getFullYear(), date.getMonth() + 1, 0).setHours(23,59,59,999); };
+
+        const App = () => {
+            const [projects, setProjects] = React.useState([]);
+            const [currentUser, setCurrentUser] = React.useState('');
+            const [isLoading, setIsLoading] = React.useState(true);
+            const [error, setError] = React.useState(null);
+            
+            const [activeProjectId, setActiveProjectId] = React.useState(null);
+            const [departmentFilter, setDepartmentFilter] = React.useState('ALL');
+            
+            const [displayStart, setDisplayStart] = React.useState(0);
+            const [displayEnd, setDisplayEnd] = React.useState(11);
+            const [displayYear, setDisplayYear] = React.useState(new Date().getFullYear());
+
+            // Modal States
+            const [isActivityModalOpen, setIsActivityModalOpen] = React.useState(false);
+            const [editingActivity, setEditingActivity] = React.useState(null);
+            
+            const [isDetailsModalOpen, setIsDetailsModalOpen] = React.useState(false);
+            const [isCapexModalOpen, setIsCapexModalOpen] = React.useState(false);
+            const [isScopeModalOpen, setIsScopeModalOpen] = React.useState(false);
+            
+            const [isTaskModalOpen, setIsTaskModalOpen] = React.useState(false);
+            const [editingTask, setEditingTask] = React.useState(null);
+            const [timeView, setTimeView] = React.useState('WEEK'); // 'WEEK' or 'MONTH'
+
+            const [isRaidModalOpen, setIsRaidModalOpen] = React.useState(false);
+            const [editingRaidItem, setEditingRaidItem] = React.useState(null);
+            const [raidFilter, setRaidFilter] = React.useState('ALL');
+            
+            const [isEditingTitle, setIsEditingTitle] = React.useState(false);
+            const [tempTitle, setTempTitle] = React.useState('');
+
+            const [isLogsModalOpen, setIsLogsModalOpen] = React.useState(false);
+            const [logs, setLogs] = React.useState([]);
+            
+            const [isCommentsModalOpen, setIsCommentsModalOpen] = React.useState(false);
+            const [commentActivity, setCommentActivity] = React.useState(null);
+
+            const [isRaidCommentsModalOpen, setIsRaidCommentsModalOpen] = React.useState(false);
+            const [commentRaidItem, setCommentRaidItem] = React.useState(null);
+
+            React.useEffect(() => {
+                if (typeof google !== 'undefined' && google.script && google.script.run) {
+                    google.script.run
+                        .withSuccessHandler((data) => {
+                            setProjects(data.projects);
+                            setCurrentUser(data.currentUser);
+                            setIsLoading(false);
+                        })
+                        .withFailureHandler((err) => {
+                            console.error(err);
+                            setError("Failed to load data.");
+                            setIsLoading(false);
+                        })
+                        .getDashboardData();
+                } else {
+                    setTimeout(() => { 
+                        setProjects(initialData); 
+                        setCurrentUser('mock.user@sph.com.sg');
+                        setIsLoading(false); 
+                    }, 800);
+                }
+            }, []);
+
+            const syncProjectToBackend = (projectData) => {
+                if (typeof google !== 'undefined' && google.script) {
+                    const dataToSave = { ...projectData };
+                    delete dataToSave.activities;
+                    delete dataToSave.raidItems;
+                    delete dataToSave.tasks;
+                    google.script.run.upsertProject(dataToSave);
+                }
+            };
+
+            const syncActivityToBackend = (activityData) => {
+                if (typeof google !== 'undefined' && google.script) {
+                    const dataToSave = { ...activityData };
+                    delete dataToSave.comments; 
+                    google.script.run.upsertActivity(dataToSave);
+                }
+            };
+
+            const syncTaskToBackend = (taskData) => {
+                if (typeof google !== 'undefined' && google.script) {
+                    google.script.run.upsertTask(taskData);
+                }
+            };
+
+            const syncRaidToBackend = (raidData) => {
+                if (typeof google !== 'undefined' && google.script) {
+                    const dataToSave = { ...raidData };
+                    delete dataToSave.comments; 
+                    google.script.run.upsertRaidItem(dataToSave);
+                }
+            };
+
+            const fetchLogs = () => {
+                if (typeof google !== 'undefined' && google.script) {
+                    google.script.run.withSuccessHandler(setLogs).getLogs();
+                }
+            };
+            
+            // STREAMING_CHUNK: Replacing html2pdf with the highly optimized Native Print approach...
+            const handleExportPDF = () => {
+                // Temporarily swap the document title so the PDF saves with a clean, dynamic filename
+                const originalTitle = document.title;
+                let filename = 'SPH_Portfolio_Report';
+                
+                if (activeProjectId) {
+                    const proj = projects.find(p => p.id === activeProjectId);
+                    if (proj) {
+                        filename = `SPH_Project_${proj.name.replace(/[^a-z0-9]/gi, '_')}`;
+                    }
+                } else {
+                    const deptName = departmentFilter === 'ALL' ? 'All_Departments' : departmentFilter.replace(/[^a-z0-9]/gi, '_');
+                    filename = `SPH_${deptName}_Report`;
+                }
+                
+                document.title = filename;
+                
+                // Trigger the browser's native, vector-based PDF engine
+                window.print();
+                
+                // Restore the original browser tab title after a short delay
+                setTimeout(() => { document.title = originalTitle; }, 100);
+            };
+
+            const getRedLinePosition = () => {
+                const now = new Date();
+                const currentMonth = now.getMonth();
+                const currentDay = now.getDate();
+                const daysInMonth = new Date(now.getFullYear(), currentMonth + 1, 0).getDate();
+                const visibleMonths = displayEnd - displayStart + 1;
+                
+                if (now.getFullYear() !== displayYear || currentMonth < displayStart || currentMonth > displayEnd) return -1; 
+                const monthOffset = currentMonth - displayStart;
+                const exactMonthFloat = monthOffset + (currentDay / daysInMonth);
+                return (exactMonthFloat / visibleMonths) * 100;
+            };
+
+            const redLinePercent = getRedLinePosition();
+            const visibleMonthsList = ALL_MONTHS.slice(displayStart, displayEnd + 1);
+
+            const formatDateStr = (dateStr) => {
+                if (!dateStr) return '-';
+                const d = new Date(dateStr);
+                if (isNaN(d.getTime())) return dateStr;
+                return d.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+            };
+
+            const getBarStyles = (startMonth, duration, startYear) => {
+                const absoluteActivityStart = (startYear * 12) + startMonth;
+                const absoluteActivityEnd = absoluteActivityStart + duration;
+                const absoluteDisplayStart = (displayYear * 12) + displayStart;
+                const absoluteDisplayEnd = (displayYear * 12) + displayEnd;
+                const visibleMonths = displayEnd - displayStart + 1;
+                
+                if (absoluteActivityEnd <= absoluteDisplayStart || absoluteActivityStart >= absoluteDisplayEnd + 1) return { display: 'none' };
+
+                const visibleStart = Math.max(absoluteActivityStart, absoluteDisplayStart);
+                const visibleEnd = Math.min(absoluteActivityEnd, absoluteDisplayEnd + 1);
+                
+                const leftPercent = ((visibleStart - absoluteDisplayStart) / visibleMonths) * 100;
+                const widthPercent = ((visibleEnd - visibleStart) / visibleMonths) * 100;
+
+                return { left: `${leftPercent}%`, width: `${widthPercent}%` };
+            };
+
+            const handleAddProject = () => {
+                const newProject = {
+                    id: `p${Date.now()}`, name: 'New Project', department: departmentFilter !== 'ALL' ? departmentFilter : 'Infra & Ops', 
+                    projectType: '', sponsor: '', manager: '', techLead: '', teamMembers: '',
+                    objective: '', scope: '', budget: '$0', actualSpend: '$0', overallStatus: 'Not Started',
+                    activities: [], raidItems: [], tasks: []
+                };
+                setProjects([...projects, newProject]);
+                syncProjectToBackend(newProject); 
+                setActiveProjectId(newProject.id);
+                setIsEditingTitle(true);
+                setTempTitle('New Project');
+            };
+
+            const handleDeleteProject = (projectId) => {
+                setProjects(projects.filter(p => p.id !== projectId));
+                if (activeProjectId === projectId) setActiveProjectId(null);
+                if (typeof google !== 'undefined' && google.script) google.script.run.deleteProject(projectId); 
+            };
+
+            const handleSaveActivity = (activityData) => {
+                const updatedActivity = activityData.id ? activityData : { ...activityData, id: `a${Date.now()}` };
+                updatedActivity.projectId = activeProjectId; 
+
+                setProjects(projects.map(p => {
+                    if (p.id === activeProjectId) {
+                        if (editingActivity && editingActivity.id) {
+                            return { ...p, activities: p.activities.map(a => a.id === editingActivity.id ? updatedActivity : a) };
+                        } else {
+                            return { ...p, activities: [...p.activities, updatedActivity] };
+                        }
+                    }
+                    return p;
+                }));
+                syncActivityToBackend(updatedActivity); 
+                setIsActivityModalOpen(false);
+            };
+
+            const handleDeleteActivity = (activityId) => {
+                setProjects(projects.map(p => {
+                    if (p.id === activeProjectId) return { ...p, activities: p.activities.filter(a => a.id !== activityId) };
+                    return p;
+                }));
+                if (typeof google !== 'undefined' && google.script) google.script.run.deleteActivity(activityId); 
+            };
+
+            const handleSaveTask = (taskData) => {
+                const updatedTask = taskData.id ? taskData : { ...taskData, id: `t${Date.now()}` };
+                updatedTask.projectId = activeProjectId; 
+
+                setProjects(projects.map(p => {
+                    if (p.id === activeProjectId) {
+                        const tasksList = p.tasks || [];
+                        if (editingTask && editingTask.id) {
+                            return { ...p, tasks: tasksList.map(t => t.id === editingTask.id ? updatedTask : t) };
+                        } else {
+                            return { ...p, tasks: [...tasksList, updatedTask] };
+                        }
+                    }
+                    return p;
+                }));
+                syncTaskToBackend(updatedTask); 
+                setIsTaskModalOpen(false);
+            };
+
+            const handleDeleteTask = (taskId) => {
+                setProjects(projects.map(p => {
+                    if (p.id === activeProjectId) return { ...p, tasks: (p.tasks || []).filter(t => t.id !== taskId) };
+                    return p;
+                }));
+                if (typeof google !== 'undefined' && google.script) google.script.run.deleteTask(taskId); 
+            };
+            
+            const handleSaveRaidItem = (raidData) => {
+                const updatedRaid = raidData.id ? raidData : { ...raidData, id: `r${Date.now()}` };
+                updatedRaid.projectId = activeProjectId; 
+
+                setProjects(projects.map(p => {
+                    if (p.id === activeProjectId) {
+                        const items = p.raidItems || [];
+                        if (editingRaidItem && editingRaidItem.id) {
+                            return { ...p, raidItems: items.map(r => r.id === editingRaidItem.id ? updatedRaid : r) };
+                        } else {
+                            return { ...p, raidItems: [...items, updatedRaid] };
+                        }
+                    }
+                    return p;
+                }));
+                syncRaidToBackend(updatedRaid); 
+                setIsRaidModalOpen(false);
+            };
+
+            const handleDeleteRaidItem = (raidId) => {
+                setProjects(projects.map(p => {
+                    if (p.id === activeProjectId) return { ...p, raidItems: (p.raidItems || []).filter(r => r.id !== raidId) };
+                    return p;
+                }));
+                if (typeof google !== 'undefined' && google.script) google.script.run.deleteRaidItem(raidId); 
+            };
+            
+            const handleAddComment = (text) => {
+                if (!text.trim() || !commentActivity) return;
+                const emailToUse = currentUser || 'Unknown User';
+                const newComment = { id: `c${Date.now()}`, activityId: commentActivity.id, timestamp: new Date().toISOString(), userEmail: emailToUse, commentText: text.trim() };
+
+                setProjects(projects.map(p => {
+                    if (p.id === activeProjectId) {
+                        return { ...p, activities: p.activities.map(a => a.id === commentActivity.id ? { ...a, comments: [...(a.comments || []), newComment] } : a) };
+                    }
+                    return p;
+                }));
+                
+                setCommentActivity(prev => ({ ...prev, comments: [...(prev.comments || []), newComment] }));
+
+                if (typeof google !== 'undefined' && google.script) google.script.run.addComment(commentActivity.id, newComment.commentText);
+            };
+
+            const handleAddRaidComment = (text) => {
+                if (!text.trim() || !commentRaidItem) return;
+                const emailToUse = currentUser || 'Unknown User';
+                const newComment = { id: `rc${Date.now()}`, raidId: commentRaidItem.id, timestamp: new Date().toISOString(), userEmail: emailToUse, commentText: text.trim() };
+
+                setProjects(projects.map(p => {
+                    if (p.id === activeProjectId) {
+                        return { ...p, raidItems: (p.raidItems || []).map(r => r.id === commentRaidItem.id ? { ...r, comments: [...(r.comments || []), newComment] } : r) };
+                    }
+                    return p;
+                }));
+                
+                setCommentRaidItem(prev => ({ ...prev, comments: [...(prev.comments || []), newComment] }));
+
+                if (typeof google !== 'undefined' && google.script) {
+                    google.script.run.addRaidComment(commentRaidItem.id, newComment.commentText);
+                }
+            };
+            
+            const handleSaveProjectField = (field, value, targetId = activeProjectId) => {
+                let updatedProject = null;
+                const newProjects = projects.map(p => {
+                    if (p.id === targetId) {
+                        updatedProject = { ...p, [field]: value };
+                        return updatedProject;
+                    }
+                    return p;
+                });
+                setProjects(newProjects);
+                if (updatedProject) syncProjectToBackend(updatedProject); 
+            };
+
+            const handleSaveProjectDetails = (details) => {
+                let updatedProject = null;
+                const newProjects = projects.map(p => {
+                    if (p.id === activeProjectId) {
+                        updatedProject = { ...p, ...details };
+                        return updatedProject;
+                    }
+                    return p;
+                });
+                setProjects(newProjects);
+                if (updatedProject) syncProjectToBackend(updatedProject); 
+                setIsDetailsModalOpen(false);
+                setIsCapexModalOpen(false);
+                setIsScopeModalOpen(false);
+            };
+
+            const handleTitleSave = () => {
+                if (tempTitle.trim() !== '') handleSaveProjectField('name', tempTitle);
+                setIsEditingTitle(false);
+            };
+
+            const renderDashboard = () => {
+                const filteredProjects = projects.filter(p => departmentFilter === 'ALL' || p.department === departmentFilter);
+                
+                // Sort projects: 'Key Project' first, then others.
+                const displayedProjects = [...filteredProjects].sort((a, b) => {
+                    if (a.projectType === 'Key Project' && b.projectType !== 'Key Project') return -1;
+                    if (a.projectType !== 'Key Project' && b.projectType === 'Key Project') return 1;
+                    return 0; // Maintain existing order for others
+                });
+
+                return (
+                    <div className="w-full max-w-7xl mx-auto mt-6 bg-sph-card-bg rounded-lg shadow-xl border border-sph-border overflow-hidden">
+                        <div className="p-4 border-b border-sph-border bg-gray-800 flex justify-between items-center">
+                            <h2 className="text-xl font-bold text-sph-blue">Executive Dashboard - Overview</h2>
+                            
+                            <div className="flex items-center space-x-3 text-sm text-gray-300 print-hide">
+                                <span>Show:</span>
+                                <select className="rounded px-2 py-1 bg-gray-700 border-gray-600 text-white" value={displayStart} onChange={(e) => setDisplayStart(Number(e.target.value))}>
+                                    {ALL_MONTHS.map((m, i) => <option key={i} value={i} disabled={i > displayEnd}>{m}</option>)}
+                                </select>
+                                <span>to</span>
+                                <select className="rounded px-2 py-1 bg-gray-700 border-gray-600 text-white" value={displayEnd} onChange={(e) => setDisplayEnd(Number(e.target.value))}>
+                                    {ALL_MONTHS.map((m, i) => <option key={i} value={i} disabled={i < displayStart}>{m}</option>)}
+                                </select>
+                                <select className="rounded px-2 py-1 bg-gray-700 border-gray-600 text-white font-bold ml-2 text-sph-blue" value={displayYear} onChange={(e) => setDisplayYear(Number(e.target.value))}>
+                                    {[2024, 2025, 2026, 2027, 2028, 2029].map(year => <option key={year} value={year}>{year}</option>)}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="w-full relative">
+                            <div className="flex w-full bg-gray-900 text-gray-300 sticky top-0 z-20 shadow-md">
+                                <div className="w-1/4 p-3 font-semibold border-r border-sph-border text-sm flex items-center">Projects List</div>
+                                <div className="w-3/4 flex relative">
+                                    {visibleMonthsList.map((month, index) => (
+                                        <div key={index} className="flex-1 text-center py-1.5 border-r border-sph-border flex flex-col items-center justify-center">
+                                            <span className="font-medium text-sm uppercase tracking-wider text-gray-300">{month}</span>
+                                            <span className="text-xs text-gray-500 mt-0.5">{displayYear}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col relative w-full">
+                                {redLinePercent >= 0 && (
+                                    <div className="absolute top-0 bottom-0 border-l-2 border-red-500/80 border-dashed z-50 pointer-events-none" style={{ left: `calc(25% + ${(redLinePercent * 0.75)}%)` }}></div>
+                                )}
+                                {displayedProjects.length === 0 && (
+                                    <div className="p-8 text-center text-gray-500 italic">No projects found in this department.</div>
+                                )}
+                                {displayedProjects.map((project, index) => {
+                                    // STREAMING_CHUNK: Applying print-avoid-break to ensure project rows stay intact on PDF pages...
+                                    const isKeyProject = project.projectType === 'Key Project';
+                                    const rowBg = index % 2 === 0 ? (isKeyProject ? 'bg-amber-900/20' : 'bg-sph-card-bg') : (isKeyProject ? 'bg-amber-900/10' : 'bg-gray-800');
+                                    
+                                    return (
+                                        <div key={project.id} className={`flex w-full border-b border-sph-border transition-colors group relative hover:z-40 print-avoid-break ${rowBg}`}>
+                                            
+                                            {isKeyProject && <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500 z-40 pointer-events-none"></div>}
+                                            
+                                            <div className="w-1/4 p-3 border-r border-sph-border flex flex-col min-h-[5rem] bg-inherit z-30">
+                                                <div className="font-semibold text-sm cursor-pointer hover:text-sph-blue transition-colors leading-snug line-clamp-2 pr-1 flex-1 flex items-start" onClick={() => setActiveProjectId(project.id)} title={project.name}>
+                                                    {isKeyProject && <i className="fa-solid fa-star text-amber-400 text-[10px] mt-1 mr-1.5" title="Key Project"></i>}
+                                                    {project.name}
+                                                </div>
+                                                
+                                                <div className="flex items-center justify-between mt-auto pt-2">
+                                                    <div className="relative flex items-center" title="Update Project Status">
+                                                        <select
+                                                            className={`appearance-none outline-none cursor-pointer text-[10px] font-bold uppercase tracking-wider rounded-full px-2.5 py-0.5 border border-transparent hover:brightness-110 transition-all ${STATUS_COLORS[project.overallStatus]} text-white shadow-sm`}
+                                                            style={{ paddingRight: '1.25rem' }}
+                                                            value={project.overallStatus}
+                                                            onChange={(e) => { 
+                                                                e.stopPropagation(); 
+                                                                handleSaveProjectField('overallStatus', e.target.value, project.id);
+                                                            }}
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            <option value="Not Started" className="bg-gray-800 text-gray-200">NOT STARTED</option>
+                                                            <option value="On Track" className="bg-gray-800 text-gray-200">ON TRACK</option>
+                                                            <option value="At Risk" className="bg-gray-800 text-gray-200">AT RISK</option>
+                                                            <option value="Overdue" className="bg-gray-800 text-gray-200">OVERDUE</option>
+                                                            <option value="Completed" className="bg-gray-800 text-gray-200">COMPLETED</option>
+                                                        </select>
+                                                        <i className="fa-solid fa-caret-down text-white/70 text-[10px] absolute right-1.5 pointer-events-none print-hide"></i>
+                                                    </div>
+                                                    <div className="ml-2 print-hide">
+                                                        <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDeleteProject(project.id); }} className="text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center w-6 h-6 rounded hover:bg-gray-700" title="Delete Project">
+                                                            <i className="fa-solid fa-trash text-xs"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="w-3/4 relative flex-1 bg-inherit z-20">
+                                                {project.activities.filter(a => a.isMilestone).map((activity) => {
+                                                    const actYear = activity.startYear || 2026;
+                                                    const styles = getBarStyles(activity.startMonth, activity.duration, actYear);
+                                                    if (styles.display === 'none') return null;
+
+                                                    const startM = Math.floor(activity.startMonth) % 12;
+                                                    const endM = Math.floor(activity.startMonth + activity.duration) % 12;
+                                                    const endY = actYear + Math.floor((activity.startMonth + activity.duration) / 12);
+
+                                                    return (
+                                                        <div key={activity.id} className={`absolute top-1/2 transform -translate-y-1/2 h-8 ${STATUS_COLORS[activity.status]} gantt-bar-container cursor-pointer`} style={{ ...styles, width: `calc(${styles.width} - 2px)`, marginLeft: '1px' }}>
+                                                            <div className="w-full h-full gantt-bar border border-black/10"></div>
+                                                            <div className="gantt-tooltip print-hide">
+                                                                <div className="font-bold mb-1 text-white">{activity.name}</div>
+                                                                <div className="text-gray-400">{ALL_MONTHS[startM]} {actYear} - {ALL_MONTHS[endM]} {endY}</div>
+                                                                <div className="text-gray-400 mt-1">Status: <span className="text-gray-200">{activity.status}</span></div>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                })}
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                            
+                            <div className="flex w-full bg-gray-900 border-t border-sph-border p-3 print-hide">
+                                <button onClick={handleAddProject} className="text-sph-blue hover:text-white font-semibold flex items-center bg-gray-800 px-4 py-2 rounded border border-gray-700 shadow-sm hover:bg-sph-light-blue/20 transition-all text-sm">
+                                    <i className="fa-solid fa-plus mr-2"></i> Add New Project
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderTaskRow = (task, isLast = false) => (
+                <div key={task.id} className={`flex w-full ${isLast ? '' : 'border-b'} border-gray-700 group hover:bg-gray-750 transition-colors items-center hover:z-10 relative bg-inherit h-16`}>
+                    <div className="w-20 px-2 shrink-0 text-sm text-gray-300 font-medium whitespace-nowrap">
+                        {formatDateStr(task.date)}
+                    </div>
+                    
+                    <div className="w-32 px-2 shrink-0 text-sm font-semibold text-gray-200 truncate" title={task.name}>
+                        {task.name}
+                    </div>
+                    
+                    <div className="flex-1 px-2 min-w-0">
+                        <div className="text-sm text-gray-400 line-clamp-2 break-words leading-tight" title={task.details}>
+                            {task.details}
+                        </div>
+                    </div>
+                    
+                    <div className="w-28 px-2 shrink-0 flex items-center justify-between">
+                        <div className="relative w-20">
+                            <select
+                                className={`w-full appearance-none bg-gray-900 border text-[10px] font-bold tracking-wider rounded py-1 pl-2 pr-3 focus:outline-none focus:border-sph-blue cursor-pointer ${TASK_STATUS_STYLES[task.status] || TASK_STATUS_STYLES['Pending']}`}
+                                value={task.status}
+                                onChange={(e) => {
+                                    const updated = {...task, status: e.target.value};
+                                    handleSaveTask(updated);
+                                }}
+                            >
+                                <option value="Pending" className="bg-gray-800 text-gray-300">PENDING</option>
+                                <option value="In Progress" className="bg-gray-800 text-sph-blue">IN PROG</option>
+                                <option value="Blocked" className="bg-gray-800 text-red-400">BLOCKED</option>
+                                <option value="Completed" className="bg-gray-800 text-green-400">DONE</option>
+                            </select>
+                            <i className="fa-solid fa-chevron-down text-gray-500 text-[8px] absolute right-1.5 top-1/2 transform -translate-y-1/2 pointer-events-none print-hide"></i>
+                        </div>
+                        
+                        <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity ml-1 print-hide">
+                            <button onClick={() => { setEditingTask(task); setIsTaskModalOpen(true); }} className="w-4 h-4 rounded text-gray-400 hover:bg-gray-700 hover:text-white flex items-center justify-center transition-colors"><i className="fa-solid fa-pen text-[9px]"></i></button>
+                            <button onClick={() => handleDeleteTask(task.id)} className="w-4 h-4 rounded text-gray-400 hover:bg-red-900/50 hover:text-red-400 flex items-center justify-center transition-colors"><i className="fa-solid fa-trash text-[9px]"></i></button>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderProjectDetail = () => {
+                const project = projects.find(p => p.id === activeProjectId);
+                if (!project) return null;
+                
+                const filteredRaid = (project.raidItems || []).filter(item => raidFilter === 'ALL' || item.type === raidFilter);
+                
+                // Task Filtering Logic based on 'WEEK' or 'MONTH' view
+                const now = new Date();
+                const taskList = project.tasks || [];
+                
+                let currentPeriodStart, currentPeriodEnd, lastPeriodStart, lastPeriodEnd;
+                let currentHeader, lastHeader;
+
+                if (timeView === 'WEEK') {
+                    currentPeriodStart = getStartOfWeek(now);
+                    currentPeriodEnd = getEndOfWeek(now);
+                    lastPeriodStart = getStartOfWeek(new Date(now.setDate(now.getDate() - 7)));
+                    lastPeriodEnd = getEndOfWeek(new Date(lastPeriodStart));
+                    currentHeader = "THIS WEEK";
+                    lastHeader = "LAST WEEK";
+                } else {
+                    currentPeriodStart = getStartOfMonth(now);
+                    currentPeriodEnd = getEndOfMonth(now);
+                    const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                    lastPeriodStart = getStartOfMonth(lastMonthDate);
+                    lastPeriodEnd = getEndOfMonth(lastMonthDate);
+                    currentHeader = "THIS MONTH";
+                    lastHeader = "LAST MONTH";
+                }
+
+                const currentTasks = taskList.filter(t => {
+                    const d = new Date(t.date).getTime();
+                    return d >= currentPeriodStart && d <= currentPeriodEnd;
+                }).sort((a,b) => new Date(a.date) - new Date(b.date));
+
+                const lastTasks = taskList.filter(t => {
+                    const d = new Date(t.date).getTime();
+                    return d >= lastPeriodStart && d <= lastPeriodEnd;
+                }).sort((a,b) => new Date(a.date) - new Date(b.date));
+
+                const typeStyle = PROJECT_TYPE_STYLES[project.projectType] || PROJECT_TYPE_STYLES['UNASSIGNED'];
+
+                // STREAMING_CHUNK: Applying print-avoid-break to individual Project Detail blocks...
+                return (
+                    <div className="w-full flex flex-col space-y-4 pb-12 relative">
+                        
+                        {/* Header Block */}
+                        <div className="flex items-center space-x-4 bg-sph-card-bg p-4 rounded-lg shadow-xl border border-sph-border relative z-40 print-avoid-break">
+                            <button onClick={() => setActiveProjectId(null)} className="text-gray-400 hover:text-white transition-colors px-3 py-1.5 border border-gray-600 rounded hover:bg-gray-700 flex items-center text-sm print-hide">
+                                <i className="fa-solid fa-arrow-left mr-2"></i> Dashboard
+                            </button>
+                            
+                            <div className="w-px h-6 bg-sph-border mx-2 print-hide"></div>
+
+                            {isEditingTitle ? (
+                                <input type="text" className="header-input text-lg font-bold px-3 py-1 w-1/2 rounded" value={tempTitle} onChange={(e) => setTempTitle(e.target.value)} onBlur={handleTitleSave} onKeyDown={(e) => e.key === 'Enter' && handleTitleSave()} autoFocus />
+                            ) : (
+                                <div className="flex items-center group flex-1 space-x-3">
+                                    <h2 className="text-xl font-bold text-white tracking-wide">{project.name}</h2>
+                                    <span className="px-2 py-0.5 bg-gray-700 text-gray-300 text-[10px] font-bold uppercase tracking-wider rounded border border-gray-600">{project.department || 'Unassigned'}</span>
+                                    
+                                    {/* Inline Dropdown for Project Type */}
+                                    <div className="relative group/type">
+                                        <select
+                                            className={`appearance-none outline-none cursor-pointer text-[10px] font-bold uppercase tracking-wider rounded py-0.5 border hover:brightness-110 transition-all shadow-sm ${typeStyle.container} ${typeStyle.text}`}
+                                            style={{ paddingLeft: '1.5rem', paddingRight: '0.75rem' }}
+                                            value={project.projectType || ''}
+                                            onChange={(e) => handleSaveProjectField('projectType', e.target.value)}
+                                        >
+                                            <option value="" disabled className="bg-gray-800 text-gray-400">Select Type...</option>
+                                            <option value="Key Project" className="bg-gray-800 text-amber-400">KEY PROJECT</option>
+                                            <option value="BAU Project" className="bg-gray-800 text-slate-300">BAU PROJECT</option>
+                                        </select>
+                                        <i className={`fa-solid ${typeStyle.icon} absolute left-2 top-1/2 transform -translate-y-1/2 text-[9px] pointer-events-none opacity-90`}></i>
+                                        <i className="fa-solid fa-chevron-down absolute right-1.5 top-1/2 transform -translate-y-1/2 text-[8px] pointer-events-none opacity-80 print-hide"></i>
+                                    </div>
+
+                                    <button onClick={() => { setTempTitle(project.name); setIsEditingTitle(true); }} className="text-gray-500 hover:text-sph-blue opacity-0 group-hover:opacity-100 transition-opacity bg-gray-800 p-1.5 rounded-full print-hide" title="Edit Project Name">
+                                        <i className="fa-solid fa-pen text-xs"></i>
+                                    </button>
+                                </div>
+                            )}
+                            
+                            <div className="ml-auto flex items-center bg-gray-900 rounded-full pl-3 pr-2 py-1.5 border border-gray-700 shadow-inner hover:border-gray-500 transition-colors focus-within:border-sph-blue focus-within:ring-1 focus-within:ring-sph-blue cursor-pointer">
+                                <div className={`w-3 h-3 rounded-full mr-2 flex-shrink-0 ${STATUS_COLORS[project.overallStatus]}`}></div>
+                                <select className="bg-transparent text-gray-200 text-sm font-semibold tracking-wide outline-none appearance-none cursor-pointer pr-1" value={project.overallStatus} onChange={(e) => handleSaveProjectField('overallStatus', e.target.value)}>
+                                    <option value="Not Started" className="bg-gray-800 text-white">NOT STARTED</option>
+                                    <option value="On Track" className="bg-gray-800 text-white">ON TRACK</option>
+                                    <option value="At Risk" className="bg-gray-800 text-white">AT RISK</option>
+                                    <option value="Overdue" className="bg-gray-800 text-white">OVERDUE</option>
+                                    <option value="Completed" className="bg-gray-800 text-white">COMPLETED</option>
+                                </select>
+                                <i className="fa-solid fa-chevron-down text-gray-500 text-xs pointer-events-none ml-1 print-hide"></i>
+                            </div>
+                        </div>
+
+                        {/* Metadata Blocks */}
+                        <div className="w-full flex flex-col space-y-4 relative z-40 print-avoid-break">
+                            <div className="flex flex-col lg:flex-row gap-4">
+                                <div className="flex-[2] bg-sph-card-bg p-5 rounded-lg shadow-lg border border-sph-border relative group hover:border-gray-500 transition-colors">
+                                    <button onClick={() => setIsDetailsModalOpen(true)} className="absolute top-3 right-3 text-gray-500 hover:text-sph-blue opacity-0 group-hover:opacity-100 transition-opacity bg-gray-800 p-2 rounded-full print-hide"><i className="fa-solid fa-pen text-xs"></i></button>
+                                    <div className="flex items-center mb-4 pb-3 border-b border-gray-700">
+                                        <i className="fa-solid fa-users text-gray-400 mr-2 text-sm"></i>
+                                        <h3 className="font-bold text-gray-300 text-xs uppercase tracking-wider">Team & Leadership</h3>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-y-6 gap-x-8 text-sm">
+                                        <div><p className="text-gray-500 mb-1 text-[10px] uppercase font-semibold tracking-wider">Sponsor</p><p className="font-medium text-gray-100">{project.sponsor || '-'}</p></div>
+                                        <div><p className="text-gray-500 mb-1 text-[10px] uppercase font-semibold tracking-wider">Project Manager</p><p className="font-medium text-gray-100">{project.manager || '-'}</p></div>
+                                        <div><p className="text-gray-500 mb-1 text-[10px] uppercase font-semibold tracking-wider">Tech Lead</p><p className="font-medium text-gray-100">{project.techLead || '-'}</p></div>
+                                        <div><p className="text-gray-500 mb-1 text-[10px] uppercase font-semibold tracking-wider">Team Members</p><p className="font-medium text-gray-100">{project.teamMembers || '-'}</p></div>
+                                    </div>
+                                </div>
+
+                                <div className="flex-1 bg-sph-card-bg p-5 rounded-lg shadow-lg border border-sph-border relative group hover:border-gray-500 transition-colors">
+                                     <button onClick={() => setIsCapexModalOpen(true)} className="absolute top-3 right-3 text-gray-500 hover:text-sph-blue opacity-0 group-hover:opacity-100 transition-opacity bg-gray-800 p-2 rounded-full print-hide"><i className="fa-solid fa-pen text-xs"></i></button>
+                                    <div className="flex items-center mb-4 pb-3 border-b border-gray-700">
+                                        <i className="fa-solid fa-coins text-gray-400 mr-2 text-sm"></i>
+                                        <h3 className="font-bold text-gray-300 text-xs uppercase tracking-wider">Financials</h3>
+                                    </div>
+                                    <div className="flex justify-around items-center h-[calc(100%-4rem)]">
+                                        <div className="text-center">
+                                            <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-2">Budget</p>
+                                            <p className="font-mono text-2xl font-bold text-gray-100 leading-none">{project.budget || '$0'}</p>
+                                        </div>
+                                        <div className="w-px bg-gray-700 h-12 mx-2"></div>
+                                        <div className="text-center">
+                                            <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-2">Actual</p>
+                                            <p className="font-mono text-2xl font-bold text-sph-blue leading-none">{project.actualSpend || '$0'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="w-full bg-sph-card-bg p-5 rounded-lg shadow-lg border border-sph-border relative group hover:border-gray-500 transition-colors">
+                                 <button onClick={() => setIsScopeModalOpen(true)} className="absolute top-3 right-3 text-gray-500 hover:text-sph-blue opacity-0 group-hover:opacity-100 transition-opacity bg-gray-800 p-2 rounded-full print-hide"><i className="fa-solid fa-pen text-xs"></i></button>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div>
+                                        <div className="flex items-center mb-3 pb-2 border-b border-gray-700">
+                                            <i className="fa-solid fa-bullseye text-gray-400 mr-2 text-sm"></i>
+                                            <h3 className="font-bold text-gray-300 text-xs uppercase tracking-wider">Objective</h3>
+                                        </div>
+                                        <p className="text-sm text-gray-300 leading-relaxed">{project.objective || 'No objective defined.'}</p>
+                                    </div>
+                                    <div>
+                                        <div className="flex items-center mb-3 pb-2 border-b border-gray-700">
+                                            <i className="fa-solid fa-list-check text-gray-400 mr-2 text-sm"></i>
+                                            <h3 className="font-bold text-gray-300 text-xs uppercase tracking-wider">Scope</h3>
+                                        </div>
+                                        <div className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">{project.scope || 'No scope defined.'}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Activities Block (Gantt Chart) */}
+                        <div className="w-full bg-sph-card-bg rounded-lg shadow-xl border border-sph-border flex flex-col relative overflow-hidden mt-4 z-30 print-avoid-break">
+                            
+                            <div className="flex w-full bg-gray-900 text-gray-300 sticky top-0 z-20 shadow-md">
+                                <div className="w-1/3 p-3 font-semibold border-r border-sph-border text-sm flex justify-between items-center">
+                                    <span>Work Breakdown (Activities)</span>
+                                </div>
+                                <div className="w-2/3 flex relative">
+                                    {visibleMonthsList.map((month, index) => (
+                                        <div key={index} className="flex-1 text-center py-2 border-r border-sph-border flex flex-col items-center justify-center">
+                                            <span className="font-medium text-xs uppercase tracking-wider text-gray-300">{month}</span>
+                                            <span className="text-[10px] text-gray-500">{displayYear}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col relative w-full">
+                                {redLinePercent >= 0 && (
+                                    <div className="absolute top-0 bottom-0 h-full border-l-2 border-red-500/80 border-dashed z-50 pointer-events-none" style={{ left: `calc(33.333% + ${(redLinePercent * 0.6666)}%)` }}></div>
+                                )}
+                                
+                                {project.activities.map((activity, index) => {
+                                    const actYear = activity.startYear || 2026;
+                                    const styles = getBarStyles(activity.startMonth, activity.duration, actYear);
+                                    
+                                    return (
+                                        <div key={activity.id} className={`flex w-full border-b border-gray-700 group relative hover:z-40 hover:bg-gray-750 transition-colors ${index % 2 === 0 ? 'bg-gray-800' : 'bg-gray-800'}`}>
+                                            <div className="w-1/3 p-3 border-r border-gray-700 flex justify-between items-center z-30 bg-inherit">
+                                                <div className="flex flex-col" style={{ paddingLeft: `${(activity.level || 0) * 1.5}rem` }}>
+                                                    <span className="text-[10px] text-gray-500 uppercase tracking-wider mb-0.5">{activity.category}</span>
+                                                    <span className={`text-sm text-gray-200 ${activity.level === 0 ? 'font-semibold' : ''}`}>{activity.name}</span>
+                                                </div>
+                                                <div className="flex items-center space-x-2">
+                                                    <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity print-hide">
+                                                        <button onClick={() => { setCommentActivity(activity); setIsCommentsModalOpen(true); }} className="w-7 h-7 rounded text-gray-400 hover:bg-gray-700 hover:text-sph-blue flex items-center justify-center transition-colors relative" title="Discuss Activity">
+                                                            <i className="fa-solid fa-comments text-xs"></i>
+                                                            {(activity.comments && activity.comments.length > 0) && (
+                                                                <span className="absolute -top-1 -right-1 bg-sph-blue text-white text-[9px] font-bold px-1 rounded-full">{activity.comments.length}</span>
+                                                            )}
+                                                        </button>
+                                                        <button onClick={() => { setEditingActivity(activity); setIsActivityModalOpen(true); }} className="w-7 h-7 rounded text-gray-400 hover:bg-gray-700 hover:text-white flex items-center justify-center transition-colors"><i className="fa-solid fa-pen text-xs"></i></button>
+                                                        <button onClick={() => handleDeleteActivity(activity.id)} className="w-7 h-7 rounded text-gray-400 hover:bg-red-900/50 hover:text-red-400 flex items-center justify-center transition-colors"><i className="fa-solid fa-trash text-xs"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="w-2/3 relative h-14 bg-inherit z-20">
+                                                {styles.display !== 'none' && (
+                                                    <div className={`absolute top-1/2 transform -translate-y-1/2 h-6 ${STATUS_COLORS[activity.status]} gantt-bar-container cursor-pointer`} style={{ ...styles, width: `calc(${styles.width} - 2px)`, marginLeft: '1px' }}>
+                                                        <div className="w-full h-full gantt-bar border border-black/10"></div>
+                                                        <div className="gantt-tooltip print-hide">
+                                                            <div className="font-bold mb-1 text-white">{activity.name}</div>
+                                                            <div className="text-gray-400">{ALL_MONTHS[Math.floor(activity.startMonth) % 12]} {actYear} - {ALL_MONTHS[Math.floor(activity.startMonth + activity.duration) % 12]} {actYear + Math.floor((activity.startMonth + activity.duration) / 12)}</div>
+                                                            <div className="text-gray-400 mt-1">Status: <span className="text-gray-200">{activity.status}</span></div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            <div className="p-3 border-t border-sph-border bg-gray-900 z-10 relative print-hide">
+                                <button onClick={() => { setEditingActivity(null); setIsActivityModalOpen(true); }} className="text-sph-blue hover:text-white text-sm font-semibold flex items-center transition-colors">
+                                    <i className="fa-solid fa-plus-circle mr-2"></i> Add Activity
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Task Tracker Block (Split View) */}
+                        <div className="w-full bg-sph-card-bg rounded-lg shadow-xl border border-sph-border flex flex-col relative overflow-hidden mt-4 z-30 print-avoid-break">
+                            
+                            {/* Header with Segmented Control */}
+                            <div className="flex w-full bg-gray-900 text-gray-300 border-b border-sph-border items-center p-3 relative">
+                                <div className="font-bold text-sm absolute left-4">Action Items</div>
+                                
+                                <div className="flex-1 flex justify-center print-hide">
+                                    <div className="flex items-center bg-gray-950 rounded-full p-1 border border-gray-700 shadow-inner">
+                                        <button 
+                                            onClick={() => setTimeView('WEEK')}
+                                            className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-full transition-all ${timeView === 'WEEK' ? 'bg-sph-blue text-white shadow-md' : 'bg-transparent text-gray-400 hover:text-gray-200 hover:bg-gray-800'}`}
+                                        >
+                                            Week
+                                        </button>
+                                        <button 
+                                            onClick={() => setTimeView('MONTH')}
+                                            className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-full transition-all ${timeView === 'MONTH' ? 'bg-sph-blue text-white shadow-md' : 'bg-transparent text-gray-400 hover:text-gray-200 hover:bg-gray-800'}`}
+                                        >
+                                            Month
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div className="absolute right-4 flex justify-end print-hide">
+                                     <button onClick={() => { setEditingTask(null); setIsTaskModalOpen(true); }} className="text-sph-blue hover:text-white text-sm font-semibold flex items-center transition-colors">
+                                        <i className="fa-solid fa-plus-circle mr-2"></i> Add Task
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            {/* Split View Content */}
+                            <div className="flex w-full relative">
+                                {/* Left Side: Last Period */}
+                                <div className="w-1/2 flex flex-col border-r border-gray-700">
+                                    <div className="bg-gray-800 text-gray-400 border-b border-gray-700 py-2 text-center text-xs font-bold uppercase tracking-wider sticky top-0 z-10 shadow-sm">
+                                        {lastHeader}
+                                    </div>
+                                    <div className="flex flex-col w-full min-h-[60px] bg-gray-800/50 flex-1">
+                                        {lastTasks.length === 0 ? (
+                                            <div className="p-6 text-center text-gray-600 italic text-sm">No tasks scheduled for {lastHeader.toLowerCase()}.</div>
+                                        ) : (
+                                            lastTasks.map((task, idx) => (
+                                                <div key={task.id} className={`w-full ${idx % 2 === 0 ? 'bg-gray-800' : 'bg-sph-card-bg'}`}>
+                                                    {renderTaskRow(task, idx === lastTasks.length - 1)}
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Right Side: This Period */}
+                                <div className="w-1/2 flex flex-col">
+                                    <div className="bg-gray-800 text-sph-blue border-b border-gray-700 py-2 text-center text-xs font-bold uppercase tracking-wider sticky top-0 z-10 shadow-sm">
+                                        {currentHeader}
+                                    </div>
+                                    <div className="flex flex-col w-full min-h-[60px] bg-gray-800/30 flex-1">
+                                        {currentTasks.length === 0 ? (
+                                            <div className="p-6 text-center text-gray-600 italic text-sm">No tasks scheduled for {currentHeader.toLowerCase()}.</div>
+                                        ) : (
+                                            currentTasks.map((task, idx) => (
+                                                <div key={task.id} className={`w-full ${idx % 2 === 0 ? 'bg-gray-800' : 'bg-sph-card-bg'}`}>
+                                                    {renderTaskRow(task, idx === currentTasks.length - 1)}
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        
+                        {/* RAID Log Block */}
+                        <div className="w-full bg-sph-card-bg rounded-lg shadow-xl border border-sph-border flex flex-col relative overflow-hidden mt-4 z-30 print-avoid-break">
+                            
+                            <div className="flex w-full bg-gray-900 text-gray-300 border-b border-sph-border items-center p-3 relative">
+                                <div className="font-bold text-sm w-1/4">RAID Log</div>
+                                
+                                <div className="flex-1 flex justify-center space-x-2 print-hide">
+                                    {['ALL', 'Risk', 'Assumption', 'Issue', 'Dependency'].map(f => (
+                                        <button 
+                                            key={f}
+                                            onClick={() => setRaidFilter(f)}
+                                            className={`px-3 py-1 text-xs font-semibold rounded-full transition-all border ${raidFilter === f ? 'bg-sph-blue text-white border-sph-blue shadow-md' : 'bg-gray-800 text-gray-400 border-gray-700 hover:text-gray-200 hover:bg-gray-700'}`}
+                                        >
+                                            {f.toUpperCase()}
+                                        </button>
+                                    ))}
+                                </div>
+                                
+                                <div className="absolute right-4 flex justify-end print-hide">
+                                     <button onClick={() => { setEditingRaidItem(null); setIsRaidModalOpen(true); }} className="text-sph-blue hover:text-white text-sm font-semibold flex items-center transition-colors">
+                                        <i className="fa-solid fa-plus-circle mr-2"></i> Add Item
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div className="flex w-full bg-gray-800 text-gray-400 border-b border-gray-700 py-2 text-xs font-bold uppercase tracking-wider">
+                                <div className="w-32 px-4 shrink-0">Type</div>
+                                <div className="flex-1 px-4 min-w-0">Description</div>
+                                <div className="w-32 px-4 shrink-0">Timeline</div>
+                                <div className="w-32 px-4 shrink-0">Owner</div>
+                                <div className="w-44 px-4 shrink-0">Status</div>
+                            </div>
+
+                            <div className="flex flex-col w-full min-h-[100px]">
+                                {filteredRaid.length === 0 ? (
+                                    <div className="p-8 text-center text-gray-500 italic text-sm">No items found for this filter.</div>
+                                ) : (
+                                    filteredRaid.map((item, index) => {
+                                        const style = RAID_STYLES[item.type] || { bg: 'bg-gray-700', text: 'text-gray-300', dot: 'bg-gray-500' };
+                                        return (
+                                            <div key={item.id} className={`flex w-full border-b border-gray-700 group hover:bg-gray-750 transition-colors py-3 items-center ${index % 2 === 0 ? 'bg-gray-800' : 'bg-sph-card-bg'}`}>
+                                                
+                                                <div className="w-32 px-4 shrink-0">
+                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold tracking-wide uppercase ${style.bg} ${style.text}`}>
+                                                        <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${style.dot}`}></span>
+                                                        {item.type}
+                                                    </span>
+                                                </div>
+                                                
+                                                <div className="flex-1 px-4 min-w-0">
+                                                    <div className="text-sm text-gray-200 line-clamp-3 break-words" title={item.description}>
+                                                        {item.description}
+                                                    </div>
+                                                </div>
+
+                                                <div className="w-32 px-4 shrink-0 flex flex-col justify-center">
+                                                    <div className="flex justify-between items-center mb-0.5">
+                                                        <span className="text-[9px] text-gray-400 font-semibold tracking-wider">START:</span>
+                                                        <span className="text-[11px] text-gray-200">{formatDateStr(item.startDate)}</span>
+                                                    </div>
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-[9px] text-gray-400 font-semibold tracking-wider">END:</span>
+                                                        <span className="text-[11px] text-gray-200">{formatDateStr(item.endDate)}</span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="w-32 px-4 shrink-0 text-sm font-medium text-gray-300 truncate" title={item.owner}>
+                                                    {item.owner}
+                                                </div>
+                                                
+                                                <div className="w-44 px-4 shrink-0 flex items-center justify-between">
+                                                    <div className="relative w-28">
+                                                        <select
+                                                            className={`w-full appearance-none bg-gray-900 border border-gray-700 text-gray-300 text-[11px] font-semibold tracking-wide rounded py-1.5 pl-2 pr-6 focus:outline-none focus:border-sph-blue cursor-pointer ${item.status === 'Closed' || item.status === 'Mitigated' ? 'opacity-60 line-through' : ''}`}
+                                                            value={item.status}
+                                                            onChange={(e) => {
+                                                                const updated = {...item, status: e.target.value};
+                                                                handleSaveRaidItem(updated);
+                                                            }}
+                                                        >
+                                                            <option value="Open">Open</option>
+                                                            <option value="Mitigated">Mitigated</option>
+                                                            <option value="Closed">Closed</option>
+                                                        </select>
+                                                        <i className="fa-solid fa-chevron-down text-gray-500 text-[9px] absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none print-hide"></i>
+                                                    </div>
+                                                    
+                                                    <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity print-hide">
+                                                        <button onClick={() => { setCommentRaidItem(item); setIsRaidCommentsModalOpen(true); }} className="w-7 h-7 rounded text-gray-400 hover:bg-gray-700 hover:text-sph-blue flex items-center justify-center transition-colors relative" title="Discuss Item">
+                                                            <i className="fa-solid fa-comments text-xs"></i>
+                                                            {(item.comments && item.comments.length > 0) && (
+                                                                <span className="absolute -top-1 -right-1 bg-sph-blue text-white text-[9px] font-bold px-1 rounded-full">{item.comments.length}</span>
+                                                            )}
+                                                        </button>
+                                                        <button onClick={() => { setEditingRaidItem(item); setIsRaidModalOpen(true); }} className="w-7 h-7 rounded text-gray-400 hover:bg-gray-700 hover:text-white flex items-center justify-center transition-colors"><i className="fa-solid fa-pen text-xs"></i></button>
+                                                        <button onClick={() => handleDeleteRaidItem(item.id)} className="w-7 h-7 rounded text-gray-400 hover:bg-red-900/50 hover:text-red-400 flex items-center justify-center transition-colors"><i className="fa-solid fa-trash text-xs"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                )}
+                            </div>
+                        </div>
+
+                    </div>
+                );
+            };
+
+            const ActivityModal = () => {
+                const [formData, setFormData] = React.useState(editingActivity || {
+                    name: '', category: 'Execution', startYear: displayYear, startMonth: displayStart, duration: 1, status: 'Not Started', isMilestone: false, level: 0
+                });
+
+                const initStartDate = React.useMemo(() => {
+                    if (!editingActivity) return `${displayYear}-01-01`;
+                    const y = editingActivity.startYear || displayYear;
+                    const m = Math.floor(editingActivity.startMonth);
+                    const d = Math.max(1, Math.round((editingActivity.startMonth - m) * 30));
+                    return `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                }, [editingActivity, displayYear]);
+
+                const initEndDate = React.useMemo(() => {
+                    if (!editingActivity) return `${displayYear}-01-31`;
+                    const y = editingActivity.startYear || displayYear;
+                    const endFloat = editingActivity.startMonth + editingActivity.duration;
+                    const m = Math.floor(endFloat);
+                    const realY = y + Math.floor(m / 12);
+                    const realM = m % 12;
+                    const d = Math.max(1, Math.round((endFloat - m) * 30));
+                    return `${realY}-${String(realM + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                }, [editingActivity, displayYear]);
+
+                const [startDateStr, setStartDateStr] = React.useState(initStartDate);
+                const [endDateStr, setEndDateStr] = React.useState(initEndDate);
+
+                const handleSave = () => {
+                    const startD = new Date(startDateStr);
+                    const endD = new Date(endDateStr);
+                    const startYear = startD.getFullYear();
+                    const startMonth = startD.getMonth() + (startD.getDate() / 30);
+                    const endYearFloat = endD.getFullYear() - startYear;
+                    const endMonth = (endYearFloat * 12) + endD.getMonth() + (endD.getDate() / 30);
+                    let duration = endMonth - startMonth;
+                    if (duration <= 0) duration = 0.1;
+
+                    handleSaveActivity({ ...formData, startYear: startYear, startMonth: startMonth, duration: duration });
+                };
+
+                return (
+                    <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center backdrop-blur-sm p-4">
+                        <div className="bg-gray-800 border border-gray-700 rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+                            <div className="p-4 border-b border-gray-700 bg-gray-900">
+                                <h2 className="text-lg font-bold text-white">{editingActivity ? 'Edit Activity' : 'Add New Activity'}</h2>
+                            </div>
+                            <div className="p-5 space-y-4">
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Activity Name</label>
+                                    <input type="text" className="w-full rounded p-2.5 text-sm bg-gray-700 text-white border-gray-600 focus:border-sph-blue focus:ring-1 focus:ring-sph-blue" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                                </div>
+                                <div className="flex space-x-4">
+                                    <div className="flex-1">
+                                        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Category</label>
+                                        <select className="w-full rounded p-2.5 text-sm bg-gray-700 text-white border-gray-600 focus:border-sph-blue focus:ring-1 focus:ring-sph-blue" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
+                                            <option value="Initiation">Initiation</option>
+                                            <option value="Planning">Planning</option>
+                                            <option value="Execution">Execution</option>
+                                            <option value="Monitoring/Testing">Monitoring/Testing</option>
+                                            <option value="Closing">Closing</option>
+                                        </select>
+                                    </div>
+                                    <div className="flex-1">
+                                        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">WBS Level</label>
+                                        <select className="w-full rounded p-2.5 text-sm bg-gray-700 text-white border-gray-600 focus:border-sph-blue focus:ring-1 focus:ring-sph-blue" value={formData.level} onChange={e => setFormData({...formData, level: Number(e.target.value)})}>
+                                            <option value={0}>0 (Phase/Group)</option>
+                                            <option value={1}>1 (Sub-task)</option>
+                                            <option value={2}>2 (Detail Task)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="flex space-x-4">
+                                    <div className="w-1/2">
+                                        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Start Date</label>
+                                        <input type="date" className="w-full rounded p-2.5 text-sm bg-gray-700 text-white border-gray-600 focus:border-sph-blue focus:ring-1 focus:ring-sph-blue [color-scheme:dark]" value={startDateStr} onChange={e => setStartDateStr(e.target.value)} />
+                                    </div>
+                                    <div className="w-1/2">
+                                        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">End Date</label>
+                                        <input type="date" className="w-full rounded p-2.5 text-sm bg-gray-700 text-white border-gray-600 focus:border-sph-blue focus:ring-1 focus:ring-sph-blue [color-scheme:dark]" value={endDateStr} onChange={e => setEndDateStr(e.target.value)} />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Status</label>
+                                    <select className="w-full rounded p-2.5 text-sm" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
+                                        <option value="Not Started">Not Started</option>
+                                        <option value="On Track">On Track</option>
+                                        <option value="At Risk">At Risk</option>
+                                        <option value="Overdue">Overdue</option>
+                                        <option value="Completed">Completed</option>
+                                    </select>
+                                </div>
+                                <div className="flex items-center pt-2">
+                                    <input type="checkbox" id="milestone-check" className="mr-3 h-4 w-4 rounded bg-gray-700 border-gray-600 text-sph-blue focus:ring-sph-blue" checked={formData.isMilestone} onChange={e => setFormData({...formData, isMilestone: e.target.checked})} />
+                                    <label htmlFor="milestone-check" className="text-sm text-gray-300">Show on Dashboard (Milestone)</label>
+                                </div>
+                            </div>
+                            <div className="p-4 border-t border-gray-700 bg-gray-900 flex justify-end space-x-3">
+                                <button onClick={() => setIsActivityModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 rounded transition-colors">Cancel</button>
+                                <button onClick={handleSave} className="px-4 py-2 text-sm font-medium text-white bg-sph-blue hover:bg-blue-600 rounded transition-colors shadow-sm">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const TaskModal = () => {
+                const [formData, setFormData] = React.useState(editingTask || {
+                    date: new Date().toISOString(), name: '', details: '', status: 'Pending'
+                });
+
+                return (
+                    <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center backdrop-blur-sm p-4">
+                        <div className="bg-gray-800 border border-gray-700 rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+                            <div className="p-4 border-b border-gray-700 bg-gray-900">
+                                <h2 className="text-lg font-bold text-white">{editingTask ? 'Edit Action Item' : 'Add Action Item'}</h2>
+                            </div>
+                            <div className="p-5 space-y-4">
+                                <div className="flex space-x-4">
+                                    <div className="w-1/2">
+                                        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Date</label>
+                                        <input 
+                                            type="date" 
+                                            className="w-full rounded p-2.5 text-sm bg-gray-700 text-white border-gray-600 focus:border-sph-blue focus:ring-1 focus:ring-sph-blue [color-scheme:dark]" 
+                                            value={formData.date ? formData.date.split('T')[0] : ''} 
+                                            onChange={e => setFormData({...formData, date: new Date(e.target.value).toISOString()})} 
+                                        />
+                                    </div>
+                                    <div className="w-1/2">
+                                        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Status</label>
+                                        <select className="w-full rounded p-2.5 text-sm bg-gray-700 text-white border-gray-600 focus:border-sph-blue focus:ring-1 focus:ring-sph-blue" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
+                                            <option value="Pending">Pending</option>
+                                            <option value="In Progress">In Progress</option>
+                                            <option value="Blocked">Blocked</option>
+                                            <option value="Completed">Completed</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Task Name</label>
+                                    <input type="text" placeholder="Short title..." className="w-full rounded p-2.5 text-sm bg-gray-700 text-white border-gray-600 focus:border-sph-blue focus:ring-1 focus:ring-sph-blue" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Details</label>
+                                    <textarea rows="3" placeholder="Additional context..." className="w-full rounded p-2.5 text-sm bg-gray-700 text-white border-gray-600 focus:border-sph-blue focus:ring-1 focus:ring-sph-blue" value={formData.details} onChange={e => setFormData({...formData, details: e.target.value})}></textarea>
+                                </div>
+                            </div>
+                            <div className="p-4 border-t border-gray-700 bg-gray-900 flex justify-end space-x-3">
+                                <button onClick={() => setIsTaskModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 rounded transition-colors">Cancel</button>
+                                <button onClick={() => handleSaveTask(formData)} className="px-4 py-2 text-sm font-medium text-white bg-sph-blue hover:bg-blue-600 rounded transition-colors shadow-sm">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const RaidModal = () => {
+                const [formData, setFormData] = React.useState(editingRaidItem || {
+                    type: 'Risk', description: '', owner: '', status: 'Open', startDate: '', endDate: ''
+                });
+
+                return (
+                    <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center backdrop-blur-sm p-4">
+                        <div className="bg-gray-800 border border-gray-700 rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+                            <div className="p-4 border-b border-gray-700 bg-gray-900">
+                                <h2 className="text-lg font-bold text-white">{editingRaidItem ? 'Edit RAID Item' : 'Add RAID Item'}</h2>
+                            </div>
+                            <div className="p-5 space-y-4">
+                                <div className="flex space-x-4">
+                                    <div className="flex-1">
+                                        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Type</label>
+                                        <select className="w-full rounded p-2.5 text-sm bg-gray-700 text-white border-gray-600 focus:border-sph-blue focus:ring-1 focus:ring-sph-blue" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}>
+                                            <option value="Risk">Risk</option>
+                                            <option value="Assumption">Assumption</option>
+                                            <option value="Issue">Issue</option>
+                                            <option value="Dependency">Dependency</option>
+                                        </select>
+                                    </div>
+                                    <div className="flex-1">
+                                        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Status</label>
+                                        <select className="w-full rounded p-2.5 text-sm bg-gray-700 text-white border-gray-600 focus:border-sph-blue focus:ring-1 focus:ring-sph-blue" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
+                                            <option value="Open">Open</option>
+                                            <option value="Mitigated">Mitigated</option>
+                                            <option value="Closed">Closed</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="flex space-x-4">
+                                    <div className="flex-1">
+                                        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Start Date</label>
+                                        <input type="date" className="w-full rounded p-2.5 text-sm bg-gray-700 text-white border-gray-600 focus:border-sph-blue focus:ring-1 focus:ring-sph-blue [color-scheme:dark]" value={formData.startDate ? formData.startDate.split('T')[0] : ''} onChange={e => setFormData({...formData, startDate: e.target.value})} />
+                                    </div>
+                                    <div className="flex-1">
+                                        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">End Date</label>
+                                        <input type="date" className="w-full rounded p-2.5 text-sm bg-gray-700 text-white border-gray-600 focus:border-sph-blue focus:ring-1 focus:ring-sph-blue [color-scheme:dark]" value={formData.endDate ? formData.endDate.split('T')[0] : ''} onChange={e => setFormData({...formData, endDate: e.target.value})} />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Owner</label>
+                                    <input type="text" placeholder="e.g. J. Toh" className="w-full rounded p-2.5 text-sm bg-gray-700 text-white border-gray-600 focus:border-sph-blue focus:ring-1 focus:ring-sph-blue" value={formData.owner} onChange={e => setFormData({...formData, owner: e.target.value})} />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Description</label>
+                                    <textarea rows="3" className="w-full rounded p-2.5 text-sm bg-gray-700 text-white border-gray-600 focus:border-sph-blue focus:ring-1 focus:ring-sph-blue" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})}></textarea>
+                                </div>
+                            </div>
+                            <div className="p-4 border-t border-gray-700 bg-gray-900 flex justify-end space-x-3">
+                                <button onClick={() => setIsRaidModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 rounded transition-colors">Cancel</button>
+                                <button onClick={() => handleSaveRaidItem(formData)} className="px-4 py-2 text-sm font-medium text-white bg-sph-blue hover:bg-blue-600 rounded transition-colors shadow-sm">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const ProjectDetailsModal = () => {
+                const project = projects.find(p => p.id === activeProjectId);
+                const [formData, setFormData] = React.useState({ 
+                    sponsor: project?.sponsor || '', 
+                    manager: project?.manager || '', 
+                    techLead: project?.techLead || '', 
+                    teamMembers: project?.teamMembers || '',
+                    department: project?.department || 'Infra & Ops'
+                });
+
+                return (
+                    <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center backdrop-blur-sm p-4">
+                        <div className="bg-sph-card-bg border border-sph-border rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
+                            <div className="p-4 border-b border-gray-700 bg-gray-900"><h2 className="text-lg font-bold text-white">Edit Team & Department Details</h2></div>
+                            <div className="p-5 space-y-4">
+                                <div className="flex space-x-4">
+                                    <div className="w-1/2"><label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Sponsor</label><input type="text" className="w-full rounded p-2.5 text-sm" value={formData.sponsor} onChange={e => setFormData({...formData, sponsor: e.target.value})} /></div>
+                                    <div className="w-1/2"><label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Project Manager</label><input type="text" className="w-full rounded p-2.5 text-sm" value={formData.manager} onChange={e => setFormData({...formData, manager: e.target.value})} /></div>
+                                </div>
+                                <div className="flex space-x-4">
+                                    <div className="w-1/2"><label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Tech Lead</label><input type="text" className="w-full rounded p-2.5 text-sm" value={formData.techLead} onChange={e => setFormData({...formData, techLead: e.target.value})} /></div>
+                                    <div className="w-1/2">
+                                        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Department</label>
+                                        <select className="w-full rounded p-2.5 text-sm" value={formData.department} onChange={e => setFormData({...formData, department: e.target.value})}>
+                                            <option value="Infra & Ops">Infra & Ops</option>
+                                            <option value="Corp Systems">Corp Systems</option>
+                                            <option value="Cyber Security">Cyber Security</option>
+                                            <option value="Digital Workspace">Digital Workspace</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Team Members</label>
+                                    <textarea className="w-full rounded p-2.5 text-sm" rows="2" value={formData.teamMembers} onChange={e => setFormData({...formData, teamMembers: e.target.value})}></textarea>
+                                </div>
+                            </div>
+                            <div className="p-4 border-t border-gray-700 bg-gray-900 flex justify-end space-x-3">
+                                <button onClick={() => setIsDetailsModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 rounded transition-colors">Cancel</button>
+                                <button onClick={() => handleSaveProjectDetails(formData)} className="px-4 py-2 text-sm font-medium text-white bg-sph-blue hover:bg-blue-600 rounded transition-colors shadow-sm">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const CapexModal = () => {
+                const project = projects.find(p => p.id === activeProjectId);
+                const [formData, setFormData] = React.useState({ budget: project?.budget || '', actualSpend: project?.actualSpend || '' });
+
+                return (
+                    <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center backdrop-blur-sm p-4">
+                        <div className="bg-sph-card-bg border border-sph-border rounded-xl shadow-2xl w-full max-w-sm overflow-hidden">
+                             <div className="p-4 border-b border-gray-700 bg-gray-900"><h2 className="text-lg font-bold text-white">Edit Financials</h2></div>
+                            <div className="p-5 space-y-4">
+                                <div className="flex space-x-4">
+                                    <div className="w-1/2"><label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Budget</label><input type="text" className="w-full rounded p-2.5 text-sm font-mono" value={formData.budget} onChange={e => setFormData({...formData, budget: e.target.value})} /></div>
+                                    <div className="w-1/2"><label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Actual Spend</label><input type="text" className="w-full rounded p-2.5 text-sm font-mono" value={formData.actualSpend} onChange={e => setFormData({...formData, actualSpend: e.target.value})} /></div>
+                                </div>
+                            </div>
+                            <div className="p-4 border-t border-gray-700 bg-gray-900 flex justify-end space-x-3">
+                                <button onClick={() => setIsCapexModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 rounded transition-colors">Cancel</button>
+                                <button onClick={() => handleSaveProjectDetails(formData)} className="px-4 py-2 text-sm font-medium text-white bg-sph-blue hover:bg-blue-600 rounded transition-colors shadow-sm">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const ObjectiveScopeModal = () => {
+                const project = projects.find(p => p.id === activeProjectId);
+                const [formData, setFormData] = React.useState({ objective: project?.objective || '', scope: project?.scope || '' });
+
+                return (
+                    <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center backdrop-blur-sm p-4">
+                        <div className="bg-sph-card-bg border border-sph-border rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden">
+                             <div className="p-4 border-b border-gray-700 bg-gray-900"><h2 className="text-lg font-bold text-white">Edit Objective & Scope</h2></div>
+                            <div className="p-5 space-y-5">
+                                <div><label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Objective</label><textarea className="w-full rounded p-3 text-sm" rows="2" value={formData.objective} onChange={e => setFormData({...formData, objective: e.target.value})}></textarea></div>
+                                <div><label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Scope Summary</label><textarea className="w-full rounded p-3 text-sm" rows="4" value={formData.scope} onChange={e => setFormData({...formData, scope: e.target.value})}></textarea></div>
+                            </div>
+                            <div className="p-4 border-t border-gray-700 bg-gray-900 flex justify-end space-x-3">
+                                <button onClick={() => setIsScopeModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 rounded transition-colors">Cancel</button>
+                                <button onClick={() => handleSaveProjectDetails(formData)} className="px-4 py-2 text-sm font-medium text-white bg-sph-blue hover:bg-blue-600 rounded transition-colors shadow-sm">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const LogsModal = () => {
+                return (
+                    <div className="fixed inset-0 bg-black/70 z-[80] flex items-center justify-center backdrop-blur-sm p-4">
+                        <div className="bg-sph-card-bg border border-gray-700 rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col h-[80vh]">
+                            <div className="p-4 border-b border-gray-700 bg-gray-900 flex justify-between items-center">
+                                <h2 className="text-lg font-bold text-white"><i className="fa-solid fa-list-check mr-2"></i> Workspace Action Log</h2>
+                                <button onClick={() => setIsLogsModalOpen(false)} className="text-gray-400 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-700"><i className="fa-solid fa-xmark"></i></button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto p-0">
+                                <table className="w-full text-left border-collapse">
+                                    <thead className="bg-gray-800 sticky top-0 z-10 shadow">
+                                        <tr>
+                                            <th className="p-3 text-xs font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-700">Timestamp</th>
+                                            <th className="p-3 text-xs font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-700">User</th>
+                                            <th className="p-3 text-xs font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-700">Action</th>
+                                            <th className="p-3 text-xs font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-700">Target</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {logs.length === 0 ? (
+                                            <tr><td colSpan="4" className="text-center p-8 text-gray-500">No logs available or fetching...</td></tr>
+                                        ) : (
+                                            logs.map((log, i) => (
+                                                <tr key={i} className="hover:bg-gray-700/50 border-b border-gray-800/50">
+                                                    <td className="p-3 text-xs text-gray-300 font-mono whitespace-nowrap">{new Date(log.timestamp).toLocaleString()}</td>
+                                                    <td className="p-3 text-sm text-sph-blue">{log.email}</td>
+                                                    <td className="p-3 text-xs font-bold text-gray-200 uppercase tracking-wider">{log.actionType}</td>
+                                                    <td className="p-3 text-sm text-gray-300"><span className="font-semibold">{log.targetName}</span><br/><span className="text-xs text-gray-500">{log.details}</span></td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const CommentsModal = ({ onClose, item, isRaid }) => {
+                const [text, setText] = React.useState('');
+                const comments = item?.comments || [];
+                const commentsEndRef = React.useRef(null);
+                
+                React.useEffect(() => { 
+                    if (commentsEndRef.current) commentsEndRef.current.scrollIntoView({ behavior: "smooth" }); 
+                }, [comments]);
+
+                return (
+                    <div className="fixed inset-0 bg-black/70 z-[70] flex items-center justify-center backdrop-blur-sm p-4">
+                        <div className="bg-[#0b141a] border border-gray-700 rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col h-[70vh]">
+                            <div className="p-4 border-b border-gray-800 bg-[#202c33] flex justify-between items-center shadow-md z-10">
+                                <div className="flex flex-col">
+                                    <h2 className="text-sm font-bold text-gray-200">{isRaid ? 'RAID Discussion' : 'Activity Discussion'}</h2>
+                                    <span className="text-xs text-gray-400 truncate max-w-[300px]">{isRaid ? item?.description : item?.name}</span>
+                                </div>
+                                <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-700">
+                                    <i className="fa-solid fa-xmark text-lg"></i>
+                                </button>
+                            </div>
+                            
+                            <div className="flex-1 p-4 overflow-y-auto bg-[#0b141a] space-y-4 relative" style={{ backgroundImage: 'url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png")', backgroundRepeat: 'repeat', backgroundBlendMode: 'overlay', backgroundColor: 'rgba(11, 20, 26, 0.95)' }}>
+                                {comments.length === 0 ? (
+                                    <div className="flex justify-center mt-10"><div className="bg-[#182229] text-gray-400 text-xs py-1.5 px-3 rounded-lg shadow-sm border border-gray-800/50">No comments yet. Start the discussion!</div></div>
+                                ) : (
+                                    comments.map((comment) => {
+                                        const isMe = comment.userEmail === currentUser;
+                                        return (
+                                            <div key={comment.id} className={`flex flex-col w-full ${isMe ? 'items-end' : 'items-start'}`}>
+                                                <div className={`max-w-[85%] rounded-lg px-3 py-2 shadow-sm relative flex flex-col ${isMe ? 'bg-[#005c4b] text-gray-100 rounded-tr-none' : 'bg-[#202c33] text-gray-100 rounded-tl-none border border-gray-700/50'}`}>
+                                                    <span className="text-[10px] font-bold text-sph-blue mb-1 leading-none">{isMe ? `You (${comment.userEmail})` : comment.userEmail}</span>
+                                                    <span className="text-sm leading-snug whitespace-pre-wrap">{comment.commentText}</span>
+                                                    <span className="text-[9px] text-gray-300 self-end mt-1.5 ml-4 block leading-none">{new Date(comment.timestamp).toLocaleString([], {month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'})}</span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                )}
+                                <div ref={commentsEndRef} />
+                            </div>
+                            
+                            <div className="p-3 bg-[#202c33] flex items-end space-x-2 z-10">
+                                <textarea 
+                                    className="flex-1 bg-[#2a3942] text-gray-200 border-none rounded-lg py-2.5 px-4 text-sm focus:ring-0 resize-none max-h-32 shadow-inner placeholder-gray-500 outline-none"
+                                    rows="1" placeholder="Type a message..." value={text}
+                                    onChange={(e) => { setText(e.target.value); e.target.style.height = 'auto'; e.target.style.height = (e.target.scrollHeight) + 'px'; }}
+                                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if(isRaid) { handleAddRaidComment(text) } else { handleAddComment(text) }; setText(''); } }}
+                                ></textarea>
+                                <button onClick={() => { if(isRaid) { handleAddRaidComment(text) } else { handleAddComment(text) }; setText(''); }} disabled={!text.trim()} className="w-10 h-10 rounded-full bg-sph-blue flex items-center justify-center text-white shrink-0 disabled:opacity-50 disabled:bg-gray-600 transition-colors mb-0.5 hover:bg-blue-600 shadow-md">
+                                    <i className="fa-solid fa-paper-plane text-sm ml-[-2px]"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            return (
+                <div className="min-h-screen flex flex-col w-full relative pb-12 selection:bg-sph-blue/30 selection:text-white">
+                    <div className="w-full bg-gray-900 border-b border-gray-800 px-6 py-4 flex justify-between items-center sticky top-0 z-[100] shadow-md">
+                        <div className="flex items-center space-x-5 w-1/3">
+                            <div className="text-2xl font-black text-white tracking-tighter flex items-center">
+                                <div className="w-8 h-8 rounded bg-gradient-to-br from-sph-blue to-blue-700 mr-2 flex items-center justify-center"><span className="text-white text-lg leading-none">S</span></div>
+                                SPH<span className="text-gray-400 font-light text-xl ml-1">Media</span>
+                            </div>
+                            <div className="h-6 w-px bg-gray-700"></div>
+                            <h1 className="text-lg font-semibold text-gray-300 tracking-wide">Project Portfolio</h1>
+                        </div>
+                        
+                        <div className="flex-1 flex justify-center print-hide">
+                            {!activeProjectId && (
+                                <div className="flex items-center space-x-1 bg-gray-950 rounded-full p-1 border border-gray-700 shadow-inner">
+                                    {DEPARTMENTS.map(dept => (
+                                        <button
+                                            key={dept}
+                                            onClick={() => setDepartmentFilter(dept)}
+                                            className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-full transition-all ${departmentFilter === dept ? 'bg-sph-blue text-white shadow-md' : 'bg-transparent text-gray-400 hover:text-gray-200 hover:bg-gray-800'}`}
+                                        >
+                                            {dept}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="flex items-center justify-end space-x-3 w-1/3 print-hide">
+                            <button 
+                                onClick={handleExportPDF} 
+                                className="text-red-400 hover:text-white bg-gray-800 hover:bg-red-900/30 border border-gray-700 hover:border-red-500/50 px-3 py-1.5 rounded transition-all text-sm font-medium flex items-center"
+                            >
+                                <i className="fa-solid fa-file-pdf mr-2"></i>
+                                Export PDF
+                            </button>
+                            
+                            <button onClick={() => { fetchLogs(); setIsLogsModalOpen(true); }} className="text-gray-300 hover:text-white bg-gray-800 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 rounded transition-colors text-sm font-medium flex items-center">
+                                <i className="fa-solid fa-clipboard-list mr-2 text-sph-blue"></i> Logs
+                            </button>
+                        </div>
+                    </div>
+
+                    {isLoading ? (
+                        <div className="flex-1 flex flex-col items-center justify-center mt-20">
+                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sph-blue mb-4"></div>
+                            <p className="text-gray-400 font-medium tracking-wide">Syncing with Google Sheets...</p>
+                        </div>
+                    ) : error ? (
+                        <div className="flex-1 flex flex-col items-center justify-center mt-20 text-red-400">
+                            <i className="fa-solid fa-triangle-exclamation text-4xl mb-4"></i>
+                            <p className="font-medium text-lg">{error}</p>
+                        </div>
+                    ) : (
+                        <div className="w-full max-w-[95%] xl:max-w-7xl mx-auto px-4 pt-6" id="report-content">
+                            {!activeProjectId ? renderDashboard() : renderProjectDetail()}
+                        </div>
+                    )}
+
+                    {isActivityModalOpen && <ActivityModal />}
+                    {isTaskModalOpen && <TaskModal />}
+                    {isRaidModalOpen && <RaidModal />}
+                    {isDetailsModalOpen && <ProjectDetailsModal />}
+                    {isCapexModalOpen && <CapexModal />}
+                    {isScopeModalOpen && <ObjectiveScopeModal />}
+                    {isLogsModalOpen && <LogsModal />}
+                    {isCommentsModalOpen && <CommentsModal onClose={() => { setIsCommentsModalOpen(false); setCommentActivity(null); }} item={commentActivity} isRaid={false} />}
+                    {isRaidCommentsModalOpen && <CommentsModal onClose={() => { setIsRaidCommentsModalOpen(false); setCommentRaidItem(null); }} item={commentRaidItem} isRaid={true} />}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
+```eof
