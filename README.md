@@ -67,8 +67,15 @@ Open the local address printed by Vite. Useful commands:
 
 Commit `package-lock.json` whenever dependencies change. CI uses `npm ci` for repeatable installation.
 
+### Local database foundation
+
+MIG-04 adds a version-controlled Supabase schema, RLS policies, trusted mutation functions, sanitized seed data, and pgTAP policy tests under `supabase/`. With the Supabase CLI and its normal local prerequisites installed, `supabase db reset` rebuilds the local database from zero and `supabase test db` runs the database tests. These commands target local/DEV work only; applying a migration to Production requires separate owner approval.
+
 ## Documentation
 
 - [Product intent and scope](docs/PRODUCT.md)
 - [Architecture and operating notes](docs/ARCHITECTURE.md)
+- [Supabase schema](docs/SUPABASE_SCHEMA.md)
+- [RLS policy matrix](docs/RLS_POLICY_MATRIX.md)
+- [RPC contract](docs/RPC_CONTRACT.md)
 - [Instructions for coding agents](AGENTS.md)
