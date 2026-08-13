@@ -22,7 +22,7 @@ This matrix is the migration checklist for behavior found in the legacy source. 
 | Milestone overview | Only `isMilestone` activities shown | REVIEW | UI migration | Approved milestone/display meaning controls overview visibility | Yes — field semantics |
 | Activity list/WBS | Category, level indentation, all activities, controls | MIGRATE | UI migration | Activities display in stored order with equivalent metadata | No |
 | Activity create/edit/delete | Modal, optimistic writes, non-cascading delete | REVIEW | Write migration | Approved validation, date, and comment-delete behavior is enforced | Yes |
-| Activity date calculations | Fractional months using day/30 and approximate reverse conversion | REVIEW | Data design | Owner-approved canonical date behavior has regression tests | Yes |
+| Activity date calculations | Fractional months using day/30 and approximate reverse conversion | REVIEW | Data design | Exact dates provide calendar semantics while original legacy fractions reproduce month-boundary, same-month, cross-month, and cross-year Gantt positions during parity | Yes — proportional replacement only |
 | Activity categories/WBS | Five categories and levels 0–2 | MIGRATE | Data contract/UI | Exact options and labels are available | No |
 | Activity comments | Create/read chat; no update/delete | REVIEW | Comments migration | Approved immutability and failure behavior; author and order preserved | Yes |
 | Task tracker | Last/current week or month split | MIGRATE | UI migration | Monday–Sunday and calendar-month grouping matches baseline | No |

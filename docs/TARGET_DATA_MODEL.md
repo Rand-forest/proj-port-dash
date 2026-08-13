@@ -49,10 +49,13 @@ audit_logs stores entity/actor snapshots without deleting with business rows
 | `overall_status` | `text` | NOT NULL DEFAULT `'Not Started'` | five project-status values |
 | `department` | `text` | NOT NULL DEFAULT `'Infra & Ops'` | four legacy values initially |
 | `project_type` | `text` | NOT NULL DEFAULT `'Unassigned'` | `Key Project`, `BAU Project`, `Unassigned` |
+| `sort_order` | `integer` | NOT NULL | `>= 0`; stable source/display order |
 | `created_at` | `timestamptz` | NOT NULL DEFAULT `now()` | — |
 | `updated_at` | `timestamptz` | NOT NULL DEFAULT `now()` | maintained by trusted trigger |
 
-Indexes: PK; partial unique `legacy_id`; `(department, project_type, created_at, id)` for dashboard filtering/stable ordering; `(overall_status)` only if profiling shows status filters justify it. Blank legacy project type maps explicitly to `Unassigned`, preserving its distinct non-Key/BAU display meaning without accepting empty database values.
+Indexes: PK; partial unique `legacy_id`; `(department, project_type, sort_order, id)` for dashboard filtering and stable ordering; `(overall_status)` only if profiling shows status filters justify it. Blank legacy project type maps explicitly to `Unassigned`, preserving its distinct non-Key/BAU display meaning without accepting empty database values.
+
+Migrated projects receive `sort_order` from their zero-based Projects-sheet data-row order. Dashboard display first applies the legacy Key Project grouping/priority rule and then orders by `sort_order` (with `id` only as a deterministic corruption tie-breaker); it never relies on `created_at` or UUID to reproduce source order. The future trusted project-create RPC assigns the next value deterministically within its transaction as `max(sort_order) + 1` (or `0` when empty), with concurrency protection and a uniqueness strategy defined in the future migration. This preserves display order only and does not introduce drag-and-drop or manual reordering.
 
 Each project has exactly one required currency. Both financial amounts are denominated in that project's `currency_code`; no database default may silently assign a currency. Do not hard-code the full ISO currency list in a PostgreSQL `CHECK`: that list and the currencies the application supports can evolve. Validate the uppercase three-letter shape at the database boundary and use a maintainable application-level supported-currency list (or another reviewed, extensible reference mechanism) for recognized codes. Different currencies must never be summed as directly comparable amounts; portfolio totals are grouped by currency unless a separate FX feature is approved.
 
@@ -66,6 +69,9 @@ Each project has exactly one required currency. Both financial amounts are denom
 | `name` | `text` | NOT NULL | trimmed, nonblank |
 | `start_date` | `date` | NOT NULL | exact canonical start |
 | `end_date` | `date` | NOT NULL | `end_date >= start_date` |
+| `legacy_start_year` | `integer` | NULL | original migrated Gantt year; all three legacy fields null or non-null together |
+| `legacy_start_month` | `numeric` | NULL | original zero-based fractional month; must be `>= 0` when present |
+| `legacy_duration` | `numeric` | NULL | original fractional duration; must be `> 0` when present |
 | `status` | `text` | NOT NULL DEFAULT `'Not Started'` | five project-status values |
 | `is_milestone` | `boolean` | NOT NULL DEFAULT `false` | retains overview visibility behavior |
 | `category` | `text` | NOT NULL DEFAULT `'Execution'` | five legacy categories |
@@ -73,7 +79,7 @@ Each project has exactly one required currency. Both financial amounts are denom
 | `sort_order` | `integer` | NOT NULL | `>= 0`; assigned during import/create |
 | `created_at`, `updated_at` | `timestamptz` | NOT NULL DEFAULT `now()` | shared timestamp rules |
 
-Indexes: PK; partial unique `legacy_id`; `(project_id, sort_order, id)` for WBS display; `(project_id, is_milestone, start_date)` for overview Gantt. The cascade is recommended but owner approval is required before migration. `is_milestone` deliberately retains the legacy field/visible behavior; renaming or redefining it is out of scope.
+Indexes: PK; partial unique `legacy_id`; `(project_id, sort_order, id)` for WBS display; `(project_id, is_milestone, start_date)` for overview Gantt. A table constraint requires the three legacy Gantt fields to be either all null or all non-null. The cascade is recommended but owner approval is required before migration. `is_milestone` deliberately retains the legacy field/visible behavior; renaming or redefining it is out of scope.
 
 ## `raid_items`
 
@@ -158,7 +164,7 @@ The first three actions replace unsafe legacy orphaning and require owner approv
 
 1. Profile all source rows without changing them. Report blank/duplicate IDs, orphans, invalid enum values, malformed dates, and ambiguous money.
 2. Generate UUIDs and preserve each accepted old ID in `legacy_id`; build mapping tables in import tooling to translate child references.
-3. Convert activity fractions into exact dates using the legacy reverse rule and flag invalid calendar outcomes. Preserve raw conversion inputs in an import report, not permanent application columns.
+3. Copy every accepted activity's source `startYear`, `startMonth`, and `duration` unchanged into its three permanent `legacy_*` Gantt fields. Use those preserved values—not a date-derived reverse conversion—for migrated Gantt positioning throughout parity. Also derive exact `start_date`/`end_date` for calendar semantics, recording ambiguity or impossible dates in the exception report; exact dates do not replace or overwrite the legacy coordinates. Post-migration activities leave all three legacy fields null and use the documented proportional exact-date renderer rule.
 4. Parse a legacy financial amount and identify its currency as separate operations. Recognized examples map as follows:
 
    | Legacy value | Parsed amount | Identified currency | Result |
@@ -172,7 +178,7 @@ The first three actions replace unsafe legacy orphaning and require owner approv
    | `TBC` | unparseable | unidentified | **OWNER REVIEW REQUIRED** |
 
    A currency is assigned only when the source value or an owner-approved mapping identifies it unambiguously. Never infer one from a generic symbol. Exception reporting must preserve the original source text, parsed amount when available, and reason for review. No FX conversion occurs during initial migration.
-5. Preserve source order using activity `sort_order`; stable IDs break ties elsewhere.
+5. Preserve Projects-sheet row order in project `sort_order` and source activity order in activity `sort_order`; stable IDs are corruption tie-breakers only. Future trusted create functions allocate deterministic next values transactionally.
 6. Map blank project type to `Unassigned`. Do not invent replacements for arbitrary enum values without owner disposition.
 7. Import comments as immutable records with mapped parents and preserved timestamps/author snapshots. Unknown identities require an approved mapping policy.
 8. Do not treat the incomplete legacy ActionLog as a full change history. If imported, label it as legacy history and assign stable target IDs without implying guarantees it never had.

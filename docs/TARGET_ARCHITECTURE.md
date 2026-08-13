@@ -36,7 +36,7 @@ This keeps the existing stack and approximately $0/month target. A Cloudflare AP
 | Audit-log reads | **Direct Supabase + RLS** | A read-only query is sufficient; RLS must restrict this sensitive, cross-user history to an approved role. |
 | Audit-log writes | **Database function/RPC** | Only controlled mutation functions (or triggers they invoke) may append logs; direct browser inserts/updates/deletes must be denied. |
 
-Gantt positioning, task week/month grouping, filters, Key Project ordering, print/PDF export, labels, and formatting are **browser-only logic**. They do not need an API. A read view or RPC may be reconsidered only if measured volume makes the normalized direct reads inadequate.
+Gantt positioning, task week/month grouping, filters, Key Project grouping plus explicit project ordering, print/PDF export, labels, and formatting are **browser-only logic**. They do not need an API. A read view or RPC may be reconsidered only if measured volume makes the normalized direct reads inadequate.
 
 ## Audit strategy comparison
 
@@ -69,9 +69,11 @@ New records use database-generated UUIDs. They avoid timestamp collisions, expos
 
 ### Activity dates and Gantt parity
 
-Canonical activities use inclusive `start_date` and `end_date` calendar dates, with `end_date >= start_date`. Exact dates replace lossy `startYear`, fractional `startMonth`, and fractional `duration`. The Gantt remains visually equivalent during parity migration: the UI computes fractional positions at render time using the legacy `month + day/30` convention and derives the bar duration from the exact endpoints. Regression cases must cover same-month, cross-month, and cross-year bars before changing that approximation. This improves stored truth without silently modernizing visible layout. A later proportional-calendar-day display would be a separate owner-approved enhancement.
+Canonical activities use inclusive `start_date` and `end_date` calendar dates, with `end_date >= start_date`, for proper calendar semantics. Exact dates alone do **not** guarantee visual parity with the legacy `startYear`, fractional `startMonth`, and fractional `duration` coordinates: notably, calendar day 1 would render as `day / 30 = 0.0333…`, while a legacy exact month boundary is an integer fraction.
 
-Import must reproduce the legacy reverse conversion (`round(fraction * 30)`, clamped to a valid calendar date), retain the original legacy values in an import report/staging data, and flag impossible/ambiguous values. The activity UI's fixed 2024–2029 selector remains a parity requirement pending the existing year-horizon owner decision.
+During the migration/parity phase, each migrated activity therefore preserves its original `legacy_start_year`, `legacy_start_month`, and `legacy_duration`. The Gantt uses those values unchanged for migrated rows, including exact start/end month boundaries, same-month spans, cross-month spans, and cross-year spans. Exact dates remain available for task/calendar semantics; conversion anomalies are reported rather than rewriting the preserved Gantt coordinates.
+
+New post-migration activities have null legacy coordinates. Their Gantt coordinates are derived consistently from exact dates by one documented renderer rule: zero-based month plus `(day - 1) / daysInMonth` for the start, with the end represented as the exclusive day after `end_date` on the same proportional calendar scale. This rule is not used to rewrite migrated legacy coordinates or claimed to round-trip them. Replacing legacy fractions with proportional calendar-date positioning is a future owner-approved enhancement only after parity is proven. The fixed 2024–2029 selector remains a parity requirement pending the existing year-horizon owner decision.
 
 ### Money
 

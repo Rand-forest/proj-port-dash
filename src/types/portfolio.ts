@@ -51,6 +51,8 @@ export interface Project extends RecordMetadata {
   overallStatus: ProjectStatus
   department: Department
   projectType: ProjectType
+  /** Stable legacy row/display order; future creates receive the next value. */
+  sortOrder: number
 }
 
 export interface Activity extends RecordMetadata {
@@ -59,6 +61,10 @@ export interface Activity extends RecordMetadata {
   name: string
   startDate: DateString
   endDate: DateString
+  /** Original fractional Gantt coordinates for migrated rows; null together for new rows. */
+  legacyStartYear: number | null
+  legacyStartMonth: number | null
+  legacyDuration: number | null
   status: ProjectStatus
   isMilestone: boolean
   category: ActivityCategory
