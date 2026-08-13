@@ -1,17 +1,21 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(40);
+select plan(41);
 
 select has_table('public','projects','projects exists');
 select has_table('public','audit_logs','audit log exists');
 select col_is_null('public','activity_comments','author_user_id','historical author may be null');
 select col_is_null('public','audit_logs','actor_user_id','historical actor may be null');
-select col_default_is('public','projects','currency_code',null,'currency has no default');
+select col_not_null('public','projects','currency_code','currency is required');
+select col_hasnt_default('public','projects','currency_code','currency has no default');
 select policies_are('public','audit_logs',array['audit_logs_read_auditors'],'audit has one read policy');
 select isnt_empty($$select indexname from pg_indexes where indexname='projects_legacy_id_uidx' and indexdef ilike '%where (legacy_id is not null)%'$$,'legacy ID is partially unique');
 
+-- Application checks set both the PostgreSQL API role and the JWT subject used by auth.uid().
+-- Metadata and cross-role verification run as the local test administrator after RESET ROLE.
+select set_config('request.jwt.claim.sub','',true);
 set local role anon;
-select is((select count(*) from public.projects),0::bigint,'anonymous reads no projects');
+select throws_ok($$select count(*) from public.projects$$,'42501','permission denied for table projects','anonymous cannot read projects');
 select throws_ok($$select public.create_project('Nope','USD')$$,'42501','permission denied for function create_project','anonymous cannot call RPC');
 reset role;
 
