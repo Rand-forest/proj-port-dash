@@ -6,7 +6,7 @@ describe('portfolioFixture', () => {
   it('contains representative portfolio values', () => {
     expect(new Set(portfolioFixture.projects.map(({ department }) => department))).toEqual(new Set(DEPARTMENTS))
     expect(new Set(portfolioFixture.raidItems.map(({ type }) => type))).toEqual(new Set(RAID_TYPES))
-    expect(portfolioFixture.projects.map(({ projectType }) => projectType)).toEqual(expect.arrayContaining(['Key Project', 'BAU Project']))
+    expect(portfolioFixture.projects.map(({ projectType }) => projectType)).toEqual(expect.arrayContaining(['Key Project', 'BAU Project', 'Unassigned']))
     expect(portfolioFixture.activities.some(({ startDate, endDate }) => startDate.slice(0, 4) !== endDate.slice(0, 4))).toBe(true)
   })
 
@@ -47,6 +47,13 @@ describe('portfolioFixture', () => {
     expect(portfolioFixture.raidItems.every(({ projectId }) => projectIds.has(projectId))).toBe(true)
     expect(portfolioFixture.activityComments.every(({ activityId }) => activityIds.has(activityId))).toBe(true)
     expect(portfolioFixture.raidComments.every(({ raidItemId }) => raidIds.has(raidItemId))).toBe(true)
-    expect([...portfolioFixture.activityComments, ...portfolioFixture.raidComments].every(({ authorEmailSnapshot }) => authorEmailSnapshot.endsWith('@example.invalid'))).toBe(true)
+    const commentEmails = [...portfolioFixture.activityComments, ...portfolioFixture.raidComments].map(({ authorEmailSnapshot }) => authorEmailSnapshot)
+    const auditEmails = portfolioFixture.auditLogs.map(({ actorEmailSnapshot }) => actorEmailSnapshot)
+
+    expect([...commentEmails, ...auditEmails].every((email) => email.endsWith('@example.invalid'))).toBe(true)
+    expect(portfolioFixture.activityComments.some(({ authorUserId }) => authorUserId === null)).toBe(true)
+    expect(portfolioFixture.auditLogs.some(({ actorUserId }) => actorUserId === null)).toBe(true)
+    expect(portfolioFixture.projects.every(({ deletedAt }) => deletedAt === null)).toBe(true)
+    expect('updatedAt' in portfolioFixture.activityComments[0]).toBe(false)
   })
 })

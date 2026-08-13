@@ -33,6 +33,7 @@ interface RecordMetadata {
   id: PortfolioId
   createdAt: TimestampString
   updatedAt: TimestampString
+  deletedAt: TimestampString | null
 }
 
 export interface Project extends RecordMetadata {
@@ -92,8 +93,11 @@ export interface Task extends RecordMetadata {
   status: TaskStatus
 }
 
-interface Comment extends RecordMetadata {
-  authorUserId: PortfolioId
+interface Comment {
+  id: PortfolioId
+  createdAt: TimestampString
+  /** Null only when an imported legacy author cannot be mapped to a current user. */
+  authorUserId: PortfolioId | null
   authorEmailSnapshot: string
   commentText: string
 }
@@ -109,7 +113,8 @@ export interface RaidComment extends Comment {
 export interface AuditLog {
   id: PortfolioId
   occurredAt: TimestampString
-  actorUserId: PortfolioId
+  /** Null only when an imported legacy actor cannot be mapped to a current user. */
+  actorUserId: PortfolioId | null
   actorEmailSnapshot: string
   action: AuditAction
   entityType: AuditEntityType

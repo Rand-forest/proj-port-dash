@@ -2,32 +2,32 @@
 
 This log records choices that materially affect future access, destructive behavior, data interpretation, or retention. Pending recommendations are design proposals, not implementation authorization; the multi-currency correction is explicitly owner-approved for future design.
 
-## 1. Who can access and change portfolio data?
+## 1. Initial user and administrator assignments
 
-- **Decision:** approve the initial user population, whether access is department-wide or portfolio-wide, and who receives viewer, editor, and audit-log access.
+- **Decision:** identify the initial users, their roles, and the administrators allowed to manage access.
 - **Legacy behavior:** source code performs no role, ownership, or department authorization; deployment settings are unknown.
-- **Recommended target behavior:** authenticated users only; `viewer` reads portfolio data, `editor` mutates it, and a restricted `auditor` capability reads logs. Add department scoping only if the business requires it.
-- **Why:** RLS and RPC grants cannot be safely written without knowing the intended access boundary.
+- **Approved target behavior:** access is initially portfolio-wide. `viewer` reads portfolio data; `editor` also performs approved mutations/comments; `auditor` reads portfolio data and audit logs; `administrator` has editor plus restricted access-management/administrative capabilities. Users cannot self-assign roles. Department-scoped authorization is not included.
+- **Why:** implementation still needs a named initial user/role assignment even though the role capabilities and portfolio-wide boundary are resolved.
 - **Risk if unchanged:** unauthorized viewing or editing, or a migration blocked because nobody can state who should have access.
-- **Owner choice:** _Pending — identify approved users/groups, role assigners, department scope, and audit viewers._
+- **Owner choice:** _Pending — provide the initial user-to-role list and identify the first administrators._
 
-## 2. Destructive deletion policy
+## 2. Recoverable deletion/archive policy
 
-- **Decision:** approve confirmed hard deletion with relational cascades for projects, activities, RAID items, and their descendants.
+- **Decision:** confirm recoverable archive behavior for ordinary application deletion.
 - **Legacy behavior:** deletes are immediate; children/comments remain as hidden orphans, while the project audit message incorrectly claims associated data was deleted.
-- **Recommended target behavior:** show confirmation, then atomically cascade project → activities/tasks/RAID/comments, activity → comments, and RAID item → comments. Never cascade audit logs.
-- **Why:** this preserves relational integrity and makes the visible action match stored data and audit wording.
-- **Risk if unchanged:** orphan data, misleading audit records, accidental loss from no-confirmation controls, and unclear restoration expectations.
-- **Owner choice:** _Pending — approve hard cascade, or request a defined archive/soft-delete and restoration policy._
+- **Approved target behavior:** ordinary delete archives the selected business record using `deleted_at`; normal reads hide archived records and descendants of archived parents. Children and comments remain recoverable. Permanent purge is not ordinary behavior and is reserved for a future restricted Administrator capability. Audit records remain independent.
+- **Why:** this prevents orphans and accidental irreversible loss while supporting recovery.
+- **Risk if unchanged:** immediate hard deletion could irreversibly remove related records and comments.
+- **Owner choice:** **APPROVED — recoverable archive for normal deletion.**
 
 ## 3. Comment retention and lifecycle
 
 - **Decision:** approve immutable comments and whether parent deletion may remove their content.
 - **Legacy behavior:** comments can be created/read but not edited or individually deleted; deleting their parent leaves inaccessible orphan rows.
-- **Recommended target behavior:** no edit or individual delete; comments cascade with a deleted parent, while append-only audit metadata records the parent deletion without copying comment text.
-- **Why:** this matches visible behavior, prevents orphan data, and avoids retaining discussion content without a stated need.
-- **Risk if unchanged:** orphaned personal content may be retained indefinitely; adding edit/delete weakens discussion history without an audit requirement.
-- **Owner choice:** _Pending — approve cascade removal or specify a legal/business retention period and authorized recovery access._
+- **Approved target behavior:** no edit or ordinary individual delete; comments remain associated with an archived parent and become visible again if it is restored.
+- **Why:** this matches visible behavior, prevents orphan data, and preserves discussion integrity through archive and restore.
+- **Risk if unchanged:** hard deletion could remove discussion history, while edit/delete would weaken its integrity.
+- **Owner choice:** **APPROVED — immutable comments retained with archived parents.**
 
 ## 4. Multi-currency project support
 
@@ -49,9 +49,9 @@ This log records choices that materially affect future access, destructive behav
 
 ## 6. Audit retention
 
-- **Decision:** approve who can read audit history and how long it must be retained.
+- **Decision:** approve how long audit history must be retained.
 - **Legacy behavior:** all logs are shown together; the sheet can be absent, logging can silently fail, and no retention/tamper policy exists.
-- **Recommended target behavior:** trusted transactional generation, append-only browser access, restricted audit readers, and a documented retention period. Retain stable actor/entity IDs and display snapshots, but not secrets or full record payloads.
+- **Recommended target behavior:** trusted transactional generation, append-only storage, auditor/administrator reads, and a documented retention period. Retain stable actor/entity IDs and display snapshots, but not secrets or full record payloads.
 - **Why:** audit data is security-sensitive and may contain personal identifiers; indefinite or unrestricted retention is not a safe default.
 - **Risk if unchanged:** incomplete accountability, excessive personal-data retention, or broad disclosure of user activity.
-- **Owner choice:** _Pending — name audit viewers and select a retention requirement before implementation._
+- **Owner choice:** _Pending — select the audit retention requirement before implementation._

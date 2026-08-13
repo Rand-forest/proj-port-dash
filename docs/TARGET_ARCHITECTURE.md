@@ -28,9 +28,9 @@ This keeps the existing stack and approximately $0/month target. A Cloudflare AP
 | --- | --- | --- |
 | Dashboard reads | **Direct Supabase + RLS** | Straight relational reads need no privileged secret. RLS must limit rows to authenticated viewers; browser code can assemble the normalized response or use a read view. |
 | Project creates/updates/deletes | **Database function/RPC** | Validate enums/money, enforce deletion policy, and write an audit event in one transaction using authenticated identity. |
-| Activity creates/updates/deletes | **Database function/RPC** | Validate exact dates/order, preserve parent integrity, cascade comments only under approved deletion policy, and audit atomically. |
+| Activity creates/updates/deletes | **Database function/RPC** | Validate exact dates/order, preserve parent integrity, archive without orphaning comments, and audit atomically. |
 | Task creates/updates/deletes | **Database function/RPC** | Validate parent/date/status and generate non-optional trusted audit events atomically. |
-| RAID creates/updates/deletes | **Database function/RPC** | Validate type/status/date order, apply approved comment cascade, and audit atomically. |
+| RAID creates/updates/deletes | **Database function/RPC** | Validate type/status/date order, archive without orphaning comments, and audit atomically. |
 | Activity comments | **Database function/RPC** | Derive author from the authenticated database context, reject blank text, and atomically create the comment and audit event. |
 | RAID comments | **Database function/RPC** | Same trusted author and atomic-audit requirements as activity comments. |
 | Audit-log reads | **Direct Supabase + RLS** | A read-only query is sufficient; RLS must restrict this sensitive, cross-user history to an approved role. |
@@ -55,11 +55,11 @@ Future authentication must provide:
 - a stable signed-in subject (`auth.users.id`/`auth.uid()`) for authorship and audit actors;
 - a verified email for display and a stored email snapshot so historical comments/logs remain understandable after an address changes;
 - session expiry, sign-out, and offboarding behavior; and
-- an initially small role claim/profile, recommended as `viewer` and `editor`, plus an `auditor` capability or role for audit-log access.
+- a trusted `user_profiles` (or equivalent authorization) record with one initial role: `viewer`, `editor`, `auditor`, or `administrator`.
 
-Email is a display/snapshot attribute, not a primary key or authorization proof. The browser must never send a trusted `authorUserId`, `actorUserId`, email, timestamp, or audit event. RPC/functions derive identity and server time. RLS/backend controls must eventually enforce authenticated reads, editor-only mutations, parent visibility, comment authorship, denied direct audit mutations, audit viewer access, and role administration. Hiding a UI control is not authorization.
+Initial access is portfolio-wide: `viewer` reads portfolio data; `editor` also performs approved mutations and adds comments; `auditor` reads portfolio data and audit logs; and `administrator` has editor capabilities plus access-management and other explicitly approved sensitive administration. Department filtering is presentation, not authorization. Email is display/snapshot data, not a primary key or authorization proof. The browser must never send a trusted `authorUserId`, `actorUserId`, email, timestamp, role, or audit event. RPC/functions derive identity and server time. RLS/backend controls must enforce these capabilities, and only a restricted administrator path may assign roles—users cannot assign their own. Hiding a UI control is not authorization.
 
-The exact user population, whether department-scoped access is required, who may edit/delete, and who may view logs remain owner decisions. Until approved and tested in DEV, no write feature should ship.
+The initial user list and administrator assignees remain owner decisions. Department-scoped authorization is not part of the initial design and would require separate approval. Until authentication, roles, RLS, and RPC controls are implemented and tested in DEV, no write feature should ship.
 
 ## Integrity and behavior decisions
 
@@ -85,15 +85,9 @@ No foreign-exchange (FX) conversion is part of the initial migration. Values in 
 
 ### Deletion and comments
 
-Recommended behavior, subject to owner approval before writes:
+Normal application deletion is recoverable archive/soft deletion through trusted RPC. It sets `deleted_at` on the selected project, activity, task, or RAID item and writes the audit event atomically. Normal reads exclude archived rows and descendants hidden by an archived parent. Comments remain create/read only and immutable: there is no ordinary edit or individual delete, and comments stay associated with archived parents for recovery and history. Audit logs remain independent and visible only to approved audit-capable roles.
 
-- deleting a **project** requires confirmation and cascades to its activities, tasks, RAID items, and both kinds of comments in one transaction;
-- deleting an **activity** cascades to its activity comments;
-- deleting a **RAID item** cascades to its RAID comments;
-- tasks have no children; and
-- audit logs never cascade and retain entity ID/label snapshots without foreign keys.
-
-This prevents the hidden orphans created by the legacy application. Comments remain create/read only: no editing or individual deletion, matching legacy behavior and protecting discussion integrity. They are deleted with their parent under the recommended cascade, while the audit log retains who deleted the parent and when but not full comment text. If regulatory retention requires comment content after parent deletion, use soft deletion/retention instead; that need is not evidenced and is an owner decision.
+Permanent purge is not ordinary user behavior. A future restricted Administrator capability may purge an archived parent and use database cascades to avoid orphans, but its retention rules, confirmation, authorization, and audit behavior require separate review before implementation.
 
 ## Security and operational guardrails
 
