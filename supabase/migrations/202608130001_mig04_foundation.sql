@@ -39,7 +39,8 @@ create table public.activities (
   constraint activities_dates_check check (end_date >= start_date),
   constraint activities_legacy_gantt_check check (
     (legacy_start_year is null and legacy_start_month is null and legacy_duration is null) or
-    (legacy_start_year is not null and legacy_start_month >= 0 and legacy_duration > 0)
+    (legacy_start_year is not null and legacy_start_month is not null and legacy_duration is not null
+      and legacy_start_month >= 0 and legacy_duration > 0)
   )
 );
 

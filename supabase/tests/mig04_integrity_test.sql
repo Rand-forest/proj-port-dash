@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(22);
+select plan(32);
 
 select throws_ok($$insert into public.projects(name,currency_code,sort_order) values('Negative order','USD',-1)$$,'23514',null,'negative project order rejected');
 select throws_ok($$insert into public.projects(name,currency_code,sort_order) values('No currency',null,90)$$,'23502',null,'currency required');
@@ -13,8 +13,20 @@ select throws_ok($$insert into public.projects(name,currency_code,sort_order,leg
 
 select throws_ok($$insert into public.activities(project_id,name,start_date,end_date,sort_order) values('20000000-0000-0000-0000-000000000001','Backwards','2026-02-02','2026-02-01',10)$$,'23514',null,'activity date order enforced');
 select throws_ok($$insert into public.activities(project_id,name,start_date,end_date,sort_order,level) values('20000000-0000-0000-0000-000000000001','Bad level','2026-02-01','2026-02-02',11,3)$$,'23514',null,'activity level enforced');
-select throws_ok($$insert into public.activities(project_id,name,start_date,end_date,sort_order,legacy_start_year) values('20000000-0000-0000-0000-000000000001','Partial parity','2026-02-01','2026-02-02',12,2026)$$,'23514',null,'partial Gantt parity rejected');
-select is((select count(*) from public.activities where legacy_start_year is not null),5::bigint,'four boundary shapes and archived-parent parity remain stored');
+select lives_ok($$insert into public.activities(project_id,name,start_date,end_date,sort_order,legacy_start_year,legacy_start_month,legacy_duration) values('20000000-0000-0000-0000-000000000001','No legacy parity','2026-02-01','2026-02-02',12,null,null,null)$$,'all-null Gantt parity accepted');
+select lives_ok($$insert into public.activities(project_id,name,start_date,end_date,sort_order,legacy_start_year,legacy_start_month,legacy_duration) values('20000000-0000-0000-0000-000000000001','Complete legacy parity','2026-02-01','2026-02-02',13,2026,1.25,0.50)$$,'complete valid Gantt parity accepted');
+-- Every partial-null permutation is explicit: PostgreSQL CHECK treats NULL as passing unless
+-- the invariant itself uses IS NULL / IS NOT NULL for all three nullable columns.
+select throws_ok($$insert into public.activities(project_id,name,start_date,end_date,sort_order,legacy_start_year,legacy_start_month,legacy_duration) values('20000000-0000-0000-0000-000000000001','Year and duration only','2026-02-01','2026-02-02',14,2026,null,2)$$,'23514',null,'year present, month null, duration present rejected');
+select throws_ok($$insert into public.activities(project_id,name,start_date,end_date,sort_order,legacy_start_year,legacy_start_month,legacy_duration) values('20000000-0000-0000-0000-000000000001','Year and month only','2026-02-01','2026-02-02',15,2026,1,null)$$,'23514',null,'year present, month present, duration null rejected');
+select throws_ok($$insert into public.activities(project_id,name,start_date,end_date,sort_order,legacy_start_year,legacy_start_month,legacy_duration) values('20000000-0000-0000-0000-000000000001','Month and duration only','2026-02-01','2026-02-02',16,null,1,2)$$,'23514',null,'year null, month present, duration present rejected');
+select throws_ok($$insert into public.activities(project_id,name,start_date,end_date,sort_order,legacy_start_year,legacy_start_month,legacy_duration) values('20000000-0000-0000-0000-000000000001','Year only','2026-02-01','2026-02-02',17,2026,null,null)$$,'23514',null,'year present, month null, duration null rejected');
+select throws_ok($$insert into public.activities(project_id,name,start_date,end_date,sort_order,legacy_start_year,legacy_start_month,legacy_duration) values('20000000-0000-0000-0000-000000000001','Month only','2026-02-01','2026-02-02',18,null,1,null)$$,'23514',null,'year null, month present, duration null rejected');
+select throws_ok($$insert into public.activities(project_id,name,start_date,end_date,sort_order,legacy_start_year,legacy_start_month,legacy_duration) values('20000000-0000-0000-0000-000000000001','Duration only','2026-02-01','2026-02-02',19,null,null,2)$$,'23514',null,'year null, month null, duration present rejected');
+select throws_ok($$insert into public.activities(project_id,name,start_date,end_date,sort_order,legacy_start_year,legacy_start_month,legacy_duration) values('20000000-0000-0000-0000-000000000001','Negative month','2026-02-01','2026-02-02',20,2026,-0.01,2)$$,'23514',null,'populated month below minimum rejected');
+select throws_ok($$insert into public.activities(project_id,name,start_date,end_date,sort_order,legacy_start_year,legacy_start_month,legacy_duration) values('20000000-0000-0000-0000-000000000001','Zero duration','2026-02-01','2026-02-02',21,2026,1,0)$$,'23514',null,'populated non-positive duration rejected');
+select throws_ok($$insert into public.activities(project_id,name,start_date,end_date,sort_order,legacy_start_year,legacy_start_month,legacy_duration) values('20000000-0000-0000-0000-000000000001','Negative duration','2026-02-01','2026-02-02',22,2026,1,-0.01)$$,'23514',null,'populated negative duration rejected');
+select is((select count(*) from public.activities where legacy_start_year is not null),6::bigint,'complete parity rows remain stored');
 select ok(exists(select 1 from public.activities where start_date=end_date and legacy_duration>0),'exact boundary parity remains valid');
 select ok(exists(select 1 from public.activities where extract(month from start_date)=extract(month from end_date) and start_date<>end_date),'same-month dates remain valid');
 select ok(exists(select 1 from public.activities where extract(month from start_date)<>extract(month from end_date)),'cross-month dates remain valid');
