@@ -7,7 +7,8 @@ MyApp is a static single-page application built by Vite. React renders the inter
 ```text
 Browser
   ├── static HTML/CSS/JavaScript ── Cloudflare Workers Static Assets
-  └── authenticated API calls ───── Supabase (Auth + Postgres)
+  ├── authenticated reads ───────── Supabase RLS-protected tables
+  └── authenticated writes ──────── Supabase transactional RPC functions
 
 GitHub pull request ── GitHub Actions checks
                     └─ Cloudflare preview Worker version
@@ -24,6 +25,7 @@ There is no application server in this repository. Values prefixed with `VITE_` 
 | `docs/` | Product and architecture decisions |
 | `.github/workflows/verify.yml` | Pull-request and branch verification |
 | `scripts/build-cloudflare.mjs` | Fail-closed DEV/PROD browser configuration selection for Cloudflare builds |
+| `supabase/` | Version-controlled local database migration, RLS/RPC tests, and sanitized seed data |
 | `wrangler.jsonc` | Production and Preview static-asset deployment settings |
 | `dist/` | Generated production output; never committed |
 
@@ -32,6 +34,7 @@ There is no application server in this repository. Values prefixed with `VITE_` 
 - **Vite and React:** a small, conventional client application with fast local feedback.
 - **Strict TypeScript:** catches interface mistakes before deployment.
 - **Supabase client is optional at startup:** CI and the placeholder page work without credentials, while future features have one validated client entry point.
+- **RLS reads and trusted RPC writes:** active authenticated profiles read portfolio tables directly through RLS. Narrow database functions validate Editor/Administrator writes and append audit history atomically; browser roles have no direct table-write grants.
 - **Workers Static Assets:** Wrangler uploads `dist/` directly, with SPA fallback serving `index.html` for client-side routes. No Worker API is needed.
 - **Separate Cloudflare environments:** the default Worker is Production and `preview` names an isolated non-production Worker. During Cloudflare builds, `WORKERS_CI_BRANCH=main` selects the externally supplied PROD Supabase browser values; every other branch selects DEV. The wrapper maps the selected pair to `VITE_` variables and fails before Vite runs if either value is absent. Normal local commands continue to read the usual Vite environment files.
 - **GitHub Actions:** uses the lockfile and runs installation, type checking, linting, tests, and a production build on every pull request and pushes to `main`.
