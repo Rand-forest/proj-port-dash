@@ -60,7 +60,7 @@ select throws_ok($$update public.audit_logs set details='Changed'$$,'42501','per
 select throws_ok($$delete from public.audit_logs$$,'42501','permission denied for table audit_logs','audit cannot delete directly');
 reset role;
 select ok((select deleted_at is not null from public.activities where id='30000000-0000-0000-0000-000000000001'),'archive sets deleted_at');
-select is((select count(*) from public.activity_comments where activity_id='30000000-0000-0000-0000-000000000001'),1::bigint,'archived activity comment remains stored');
+select is((select count(*) from public.activity_comments where activity_id='30000000-0000-0000-0000-000000000001'),2::bigint,'archived activity retains its seeded and newly created comments without duplication');
 
 select * from finish();
 rollback;
